@@ -1,6 +1,7 @@
 import 'package:android_app/graph_page.dart';
 import 'package:android_app/home_page.dart';
 import 'package:android_app/memo_page.dart';
+import 'package:android_app/navigation_bar.dart' as custom_nav;
 import 'package:android_app/settings_page.dart';
 import 'package:android_app/task_page.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class MyHomePage extends StatefulWidget {
 
 // barra laterale
 class _MyHomePageState extends State<MyHomePage> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
 
   final List<Widget> _pages = [
     HomePage(),
@@ -60,14 +61,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        leading: IconButton(
-          icon: Icon(Icons.menu), 
-          onPressed: () {  },
-        )
-      )
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+      ),
+      home: const Home(), // Usa il widget Home con il Drawer
     );
   }
 }
