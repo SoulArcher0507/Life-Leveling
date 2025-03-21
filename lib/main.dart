@@ -1,3 +1,8 @@
+import 'package:android_app/graph_page.dart';
+import 'package:android_app/home_page.dart';
+import 'package:android_app/memo_page.dart';
+import 'package:android_app/settings_page.dart';
+import 'package:android_app/task_page.dart';
 import 'package:flutter/material.dart';
 import 'navigation_bar.dart';
 
@@ -45,11 +50,11 @@ class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    Center(child: Text('Home Page')),
-    Center(child: Text('Task Page')),
-    Center(child: Text('Promemoria Page')),
-    Center(child: Text('Grafico Page')),
-    Center(child: Text('Impostazioni Page')),
+    HomePage(),
+    TaskPage(),
+    MemoPage(),
+    GraphPage(),
+    SettingsPage(),
   ];
 
   @override
@@ -68,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 _currentIndex = index;
               });
             },
-          ),
+),
           Expanded(
             child: IndexedStack(
               index: _currentIndex,
