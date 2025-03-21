@@ -42,6 +42,16 @@ class MyHomePage extends StatefulWidget {
 
 // barra laterale
 class _MyHomePageState extends State<MyHomePage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    Center(child: Text('Home Page')),
+    Center(child: Text('Task Page')),
+    Center(child: Text('Promemoria Page')),
+    Center(child: Text('Grafico Page')),
+    Center(child: Text('Impostazioni Page')),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,11 +62,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
       body: Row(
         children: [
-          // navigation_bar.dart
-          const MyNavigationBar(),
+          MyNavigationBar(
+            onDestinationSelected: (int index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
           Expanded(
-            child: Center(
-              child: Text('Qui ci va il tuo contenuto'),
+            child: IndexedStack(
+              index: _currentIndex,
+              children: _pages,
             ),
           ),
         ],
