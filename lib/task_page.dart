@@ -12,6 +12,6 @@ class TaskPageState extends State<TaskPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Text("TaskPage");
+    return Text("Task Page");
   }
 }

@@ -1,11 +1,12 @@
 import 'package:android_app/graph_page.dart';
 import 'package:android_app/home_page.dart';
 import 'package:android_app/memo_page.dart';
-import 'package:android_app/navigation_bar.dart' as custom_nav;
 import 'package:android_app/settings_page.dart';
 import 'package:android_app/task_page.dart';
 import 'package:flutter/material.dart';
-import 'navigation_bar.dart';
+import 'bottom_navigation_bar.dart';
+import 'disappearing_bottom_navigation_bar.dart';
+import 'disappearing_navigation_rail.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,25 +48,88 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-// barra laterale
-class _MyHomePageState extends State<MyHomePage> {
-  final int _currentIndex = 0;
 
-  final List<Widget> _pages = [
+
+// navigation bar
+class _MyHomePageState extends State<MyHomePage> {
+  late final _colorScheme = Theme.of(context).colorScheme;
+  late final _backgroundColor = Color.alphaBlend(
+      _colorScheme.primary.withOpacity(0.14), _colorScheme.surface);
+  
+  int selectedIndex = 0;
+
+  final List<Widget> pages = [
     HomePage(),
     TaskPage(),
     MemoPage(),
     GraphPage(),
-    SettingsPage(),
   ];
+
+  bool wideScreen = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final double width = MediaQuery.of(context).size.width;
+    wideScreen = width > 600;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
+            icon: const Icon(Icons.settings),
+          ),
+        ],
       ),
-      home: const Home(), // Usa il widget Home con il Drawer
+      body: Row(
+        children: [
+          if (wideScreen)
+            DisappearingNavigationRail(
+              selectedIndex: selectedIndex,
+              backgroundColor: _backgroundColor,
+              onDestinationSelected: (index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            ),
+          Expanded(
+            child: Container(
+              color: _backgroundColor,
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: wideScreen
+          ? null
+          : FloatingActionButton(
+              backgroundColor: _colorScheme.tertiaryContainer,
+              foregroundColor: _colorScheme.onTertiaryContainer,
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
+      bottomNavigationBar: wideScreen
+          ? null
+          : DisappearingBottomNavigationBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            ),
     );
   }
+
 }

@@ -12,6 +12,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Text("HomePage");
+    return Text("HomePage", style: TextStyle(fontSize: 24));
   }
 }
