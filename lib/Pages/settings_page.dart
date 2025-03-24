@@ -5,13 +5,13 @@ class SettingsPage extends StatefulWidget{
   const SettingsPage({super.key});
 
   @override
-  GraphPageState createState() => GraphPageState();
+  SettingsPageState createState() => SettingsPageState();
 }
 
-class GraphPageState extends State<SettingsPage> {
+class SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Text("SettingsPage");
+    return Text("Settings 10 Page");
   }
 }

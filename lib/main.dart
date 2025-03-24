@@ -1,8 +1,8 @@
-import 'package:android_app/graph_page.dart';
-import 'package:android_app/home_page.dart';
-import 'package:android_app/memo_page.dart';
-import 'package:android_app/settings_page.dart';
-import 'package:android_app/task_page.dart';
+import 'package:android_app/Pages/graph_page.dart';
+import 'package:android_app/Pages/home_page.dart';
+import 'package:android_app/Pages/memo_page.dart';
+import 'package:android_app/Pages/settings_page.dart';
+import 'package:android_app/Pages/task_page.dart';
 import 'package:flutter/material.dart';
 import 'bottom_navigation_bar.dart';
 import 'disappearing_bottom_navigation_bar.dart';
@@ -105,9 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           Expanded(
-            child: Container(
-              color: _backgroundColor,
-            ),
+            child: pages[selectedIndex], // Mostra la pagina selezionata
           ),
         ],
       ),
