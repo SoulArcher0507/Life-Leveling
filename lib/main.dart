@@ -1,133 +1,64 @@
-import 'package:android_app/Pages/graph_page.dart';
-import 'package:android_app/Pages/home_page.dart';
-import 'package:android_app/Pages/memo_page.dart';
-import 'package:android_app/Pages/settings_page.dart';
-import 'package:android_app/Pages/task_page.dart';
 import 'package:flutter/material.dart';
-import 'bottom_navigation_bar.dart';
-import 'disappearing_bottom_navigation_bar.dart';
-import 'disappearing_navigation_rail.dart';
+// import 'package:tuo_progetto/theme/solo_leveling_theme.dart'; 
+// (Quando avrai creato il file del tema, scommenta e usa il tuo tema personalizzato)
+
+// import 'package:tuo_progetto/routes/app_routes.dart'; 
+// (Quando avrai creato il file delle rotte, scommenta questa importazione)
 
 void main() {
+  // La funzione main è il punto di ingresso dell'app: richiama runApp
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // MyApp è il widget root dell'applicazione
+  const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Qui costruiamo il MaterialApp, il "contenitore" di base dell'app
     return MaterialApp(
-      theme: ThemeData(
+      // debugShowCheckedModeBanner serve a nascondere il banner "DEBUG" in alto a destra
+      debugShowCheckedModeBanner: false,
 
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+      // Se hai già creato un tema in solo_leveling_theme.dart, qui potresti usare:
+      // theme: SoloLevelingTheme.lightTheme, 
+      theme: ThemeData(
+        primarySwatch: Colors.blue, 
+        // Per iniziare, usiamo un theme basico, poi lo personalizzi con il tuo file 'solo_leveling_theme.dart'
       ),
-      home: const MyHomePage(title: ""),
+
+      // initialRoute definisce la prima pagina che l'app aprirà
+      // In futuro, puoi usare "AppRoutes.dashboard" o simili
+      initialRoute: '/',
+
+      // Le route dell'app. In un progetto più grande le estraiamo in app_routes.dart
+      routes: {
+        '/': (context) => const HomePage(),
+        // '/dashboard': (context) => const DashboardPage(),
+        // '/progetti': (context) => const ProgettiPage(),
+        // etc...
+      },
     );
   }
 }
 
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-
-
-// navigation bar
-class _MyHomePageState extends State<MyHomePage> {
-  late final _colorScheme = Theme.of(context).colorScheme;
-  late final _backgroundColor = Color.alphaBlend(
-      _colorScheme.primary.withOpacity(0.14), _colorScheme.surface);
-  
-  int selectedIndex = 0;
-
-  final List<Widget> pages = [
-    HomePage(),
-    TaskPage(),
-    MemoPage(),
-    GraphPage(),
-  ];
-
-  bool wideScreen = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    final double width = MediaQuery.of(context).size.width;
-    wideScreen = width > 600;
-  }
+class HomePage extends StatelessWidget {
+  // Questa pagina è solo un placeholder: sostituiscila con la Dashboard
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Semplice scaffold con un AppBar e un testo al centro
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsPage()),
-              );
-            },
-            icon: const Icon(Icons.settings),
-          ),
-        ],
+        title: const Text('Home Page'),
       ),
-      body: Row(
-        children: [
-          if (wideScreen)
-            DisappearingNavigationRail(
-              selectedIndex: selectedIndex,
-              backgroundColor: _backgroundColor,
-              onDestinationSelected: (index) {
-                setState(() {
-                  selectedIndex = index;
-                });
-              },
-            ),
-          Expanded(
-            child: pages[selectedIndex], // Mostra la pagina selezionata
-          ),
-        ],
+      body: const Center(
+        child: Text(
+          'Benvenuto nella tua app stile Solo Leveling!',
+        ),
       ),
-      floatingActionButton: wideScreen
-          ? null
-          : FloatingActionButton(
-              backgroundColor: _colorScheme.tertiaryContainer,
-              foregroundColor: _colorScheme.onTertiaryContainer,
-              onPressed: () {},
-              child: const Icon(Icons.add),
-            ),
-      bottomNavigationBar: wideScreen
-          ? null
-          : DisappearingBottomNavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: (index) {
-                setState(() {
-                  selectedIndex = index;
-                });
-              },
-            ),
     );
   }
-
 }
