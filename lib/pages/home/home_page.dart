@@ -29,12 +29,11 @@ class _MyHomePageState extends State<MyHomePage> {
   // Assicurati di creare e importare le tue vere pagine.
   final List<Widget> _pages = [
     const DashboardPage(),
-
-    const QuestsPage(),
     // ProgettiPage(),
-    // QuestsPage(),
+    const QuestsPage(),
+
     // GraficiPage(),
-    // Per ora metto segnaposto
+
     Center(child: Text('Progetti Page Placeholder')),
     Center(child: Text('Quests Page Placeholder')),
     Center(child: Text('Grafici Page Placeholder')),

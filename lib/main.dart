@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:life_leveling/pages/home/home_page.dart';
 import 'package:life_leveling/services/quest_service.dart';
 
-/*
-  main.dart è il punto di ingresso dell’app.
-  Gestisce il MaterialApp, il tema e la home iniziale.
-*/
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +27,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       // Rimuove il banner "debug" nell'angolo
       debugShowCheckedModeBanner: false,
-
-      // Un esempio di titolo dell’app (facoltativo)
-      title: 'Solo Leveling App',
 
       // Se hai creato un tema dedicato in solo_leveling_theme.dart, puoi sostituire ThemeData con il tuo:
       // theme: SoloLevelingTheme.lightTheme,

@@ -13,12 +13,12 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   // Dati utente (esempio)
-  final String userName = 'John Doe';
-  final int currentLevel = 5;
-  final double currentXP = 120.0;
-  final double requiredXP = 200.0;
-  final String userClass = 'Shadow Monarch';
-  final String userAbilities = 'Dominion of Shadows, Enhanced Strength...';
+  final String userName = 'Corrado Enea Crevatin';
+  final int currentLevel = 1;
+  final double currentXP = 0;
+  final double requiredXP = 10.0;
+  final String userClass = 'Principiante';
+  final String userAbilities = 'Vivere';
 
   
 
@@ -77,6 +77,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 );
               },
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -235,9 +236,16 @@ class _DashboardPageState extends State<DashboardPage> {
 
   // ----- Lista di quest (max 3 in Dashboard) -----
   Widget _buildQuestList({
-    required List<QuestData> quests,
-    required Function(QuestData quest) onQuestTap,
-  }) {
+  required List<QuestData> quests,
+  required Function(QuestData quest) onQuestTap,
+}) {
+    if (quests.isEmpty) {
+      return Text(
+        'Nessuna quest trovata per questo giorno',
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
     return Column(
       children: quests.map((quest) {
         return InkWell(
