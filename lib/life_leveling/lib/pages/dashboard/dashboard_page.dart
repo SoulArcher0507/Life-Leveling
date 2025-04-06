@@ -24,31 +24,43 @@ class _DashboardPageState extends State<DashboardPage> {
       title: 'Progetto Universitario',
       deadline: DateTime(2025, 5, 10),
       isDaily: false,
+      xp: 50,              // Assegna un valore, ad es. 50
+      notes: ""
     ),
     QuestData(
       title: 'Refactoring App Flutter',
       deadline: DateTime(2025, 5, 15),
       isDaily: false,
+      xp: 50,              // Assegna un valore, ad es. 50
+      notes: ""
     ),
     QuestData(
       title: 'Workout mattutino',
       deadline: DateTime.now(),
       isDaily: true,
+      xp: 50,              // Assegna un valore, ad es. 50
+      notes: ""
     ),
     QuestData(
       title: 'Lavare i denti',
       deadline: DateTime.now(),
       isDaily: true,
+      xp: 50,              // Assegna un valore, ad es. 50
+      notes: ""
     ),
     QuestData(
       title: 'Studiare Inglese',
       deadline: DateTime(2025, 4, 15),
       isDaily: false,
+      xp: 50,              // Assegna un valore, ad es. 50
+      notes: ""
     ),
     QuestData(
       title: 'Pulire la stanza',
       deadline: DateTime.now(),
       isDaily: true,
+      xp: 50,              // Assegna un valore, ad es. 50
+      notes: ""
     ),
   ];
 

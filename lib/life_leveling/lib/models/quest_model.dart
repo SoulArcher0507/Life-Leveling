@@ -16,9 +16,45 @@ class QuestData {
   final DateTime deadline;
   final bool isDaily;
 
+  // Aggiungiamo i nuovi campi:
+  final int xp;              // punti esperienza assegnati alla quest
+  final String notes;        // note aggiuntive
+  final bool repeatedWeekly; // se la quest si ripete settimanalmente
+
   QuestData({
     required this.title,
     required this.deadline,
     required this.isDaily,
+
+    required this.xp,
+    required this.notes,
+    this.repeatedWeekly = false, // default = false
   });
+
+// Converte un QuestData in Map<String, dynamic> (per JSON)
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'deadline': deadline.toIso8601String(),
+      'isDaily': isDaily,
+      'xp': xp,
+      'notes': notes,
+      'repeatedWeekly': repeatedWeekly,
+    };
+  }
+
+  // Ricostruisce un QuestData da JSON
+  factory QuestData.fromJson(Map<String, dynamic> json) {
+    return QuestData(
+      title: json['title'] as String,
+      deadline: DateTime.parse(json['deadline'] as String),
+      isDaily: json['isDaily'] as bool,
+      xp: json['xp'] as int,
+      notes: json['notes'] as String,
+      repeatedWeekly: json['repeatedWeekly'] as bool,
+    );
+  }
+
 }
+
+

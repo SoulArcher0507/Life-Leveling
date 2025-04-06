@@ -3,15 +3,22 @@ import 'package:flutter/material.dart';
 // import 'package:tuo_progetto/routes/app_routes.dart';
 // import 'package:tuo_progetto/pages/settings/settings_page.dart';
 import 'package:life_leveling/pages/home/home_page.dart';
+import 'package:life_leveling/services/quest_service.dart';
 
 /*
   main.dart è il punto di ingresso dell’app.
   Gestisce il MaterialApp, il tema e la home iniziale.
 */
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Carichiamo i dati delle quest prima di avviare l'app
+  await QuestService().init();
+
   runApp(const MyApp());
 }
+
 
 
 
