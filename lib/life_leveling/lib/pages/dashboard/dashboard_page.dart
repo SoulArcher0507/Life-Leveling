@@ -1,116 +1,160 @@
+// lib/pages/dashboard/dashboard_page.dart
+
 import 'package:flutter/material.dart';
-// import 'package:life_leveling/pages/quests/quests_page.dart';
-// import 'package:life_leveling/pages/quests/quest_info_page.dart';
-// import 'package:life_leveling/models/quest_model.dart';
-// import 'package:life_leveling/models/user_model.dart';
+import 'package:life_leveling/models/quest_model.dart';
+import 'package:life_leveling/pages/quests/quests_page.dart';
 
-/*
-  Questa pagina mostra la Dashboard, con:
-  - Informazioni sull'utente (livello, XP, classe, abilità...).
-  - Lista delle quest ad alta priorità (scadenze prossime).
-  - Lista delle quest giornaliere.
-*/
-
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
 
   @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  // Esempio di dati utente
+  final String userName = 'John Doe';
+  final int currentLevel = 5;
+  final double currentXP = 120.0;
+  final double requiredXP = 200.0;
+  final String userClass = 'Shadow Monarch';
+  final String userAbilities = 'Dominion of Shadows, Enhanced Strength...';
+
+  // Esempio di quest
+  // In un progetto reale, potresti recuperarli da un DB / Service.
+  final List<QuestData> allQuests = [
+    QuestData(
+      title: 'Progetto Universitario',
+      deadline: DateTime(2025, 5, 10),
+      isDaily: false,
+    ),
+    QuestData(
+      title: 'Refactoring App Flutter',
+      deadline: DateTime(2025, 5, 15),
+      isDaily: false,
+    ),
+    QuestData(
+      title: 'Workout mattutino',
+      deadline: DateTime.now(),
+      isDaily: true,
+    ),
+    QuestData(
+      title: 'Lavare i denti',
+      deadline: DateTime.now(),
+      isDaily: true,
+    ),
+    QuestData(
+      title: 'Studiare Inglese',
+      deadline: DateTime(2025, 4, 15),
+      isDaily: false,
+    ),
+    QuestData(
+      title: 'Pulire la stanza',
+      deadline: DateTime.now(),
+      isDaily: true,
+    ),
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    // Esempio di dati utente segnaposto
-    final String userName = 'John Doe';
-    final int currentLevel = 5;
-    final double currentXP = 120.0;
-    final double requiredXP = 200.0;
-    final String userClass = 'Shadow Monarch'; // Esempio stile "Solo Leveling"
-    final String userAbilities = 'Dominion of Shadows, Enhanced Strength...';
+    // 1) Separiamo le quest in highPriority (non giornaliere) e daily (giornaliere)
+    final highPriorityQuests = allQuests.where((q) => !q.isDaily).toList();
+    final dailyQuests = allQuests.where((q) => q.isDaily).toList();
 
-    // Esempio di Quest ad alta priorità (segnaposto)
-    final List<Map<String, String>> highPriorityQuests = [
-      {
-        'title': 'Progetto Universitario',
-        'deadline': '2025-05-10',
-      },
-      {
-        'title': 'Refactoring App Flutter',
-        'deadline': '2025-05-15',
-      },
-    ];
+    // 2) Ordiniamo le highPriority in base alla scadenza
+    highPriorityQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
+    // Le daily di solito hanno scadenza "oggi" o simile, ma se vuoi puoi ordinarle
+    dailyQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
 
-    // Esempio di Quest giornaliere (segnaposto)
-    final List<Map<String, String>> dailyQuests = [
-      {
-        'title': 'Workout mattutino',
-        'deadline': 'Ogni giorno',
-      },
-      {
-        'title': 'Lavare i denti',
-        'deadline': 'Ogni giorno',
-      },
-    ];
+    // 3) Mostriamo solo le prime 3 per la dashboard
+    final top3HighPriority = highPriorityQuests.length > 3
+        ? highPriorityQuests.sublist(0, 3)
+        : highPriorityQuests;
+
+    final top3Daily = dailyQuests.length > 3
+        ? dailyQuests.sublist(0, 3)
+        : dailyQuests;
 
     return SingleChildScrollView(
-      // SingleChildScrollView per gestire overflow se i contenuti superano l’altezza dello schermo
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Header: Nome Utente, Livello e Barra XP ---
+            // --- Header utente: cliccando su livello si aprono dettagli (non mostrato qui) ---
             _buildUserHeader(
+              context: context,
               userName: userName,
               currentLevel: currentLevel,
               currentXP: currentXP,
               requiredXP: requiredXP,
               userClass: userClass,
               userAbilities: userAbilities,
-              context: context,
             ),
             const SizedBox(height: 24.0),
 
-            // --- Quest ad alta priorità ---
-            Text(
-              'Quest ad Alta Priorità',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8.0),
-            _buildQuestList(
-              quests: highPriorityQuests,
-              onQuestTap: (quest) {
-                // Esempio di azione quando clicchi su una quest ad alta priorità
-                // - Potresti aprire la sezione Quests con un filtro
-                // - Oppure direttamente la pagina info di quella quest
-                // Per esempio, con named routes:
-                /*
-                Navigator.pushNamed(
-                  context, 
-                  '/quest_info',
-                  arguments: quest, // Passi i dati della quest
-                );
-                */
-              },
-            ),
-            const SizedBox(height: 24.0),
-
-            // --- Quest Giornaliere ---
-            Text(
-              'Quest Giornaliere',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 8.0),
-            _buildQuestList(
-              quests: dailyQuests,
-              onQuestTap: (quest) {
-                // Stesso discorso di sopra
-                // Esempio:
-                /*
+            // --- Gruppo cliccabile: Quest ad Alta Priorità (solo 3 in dashboard) ---
+            InkWell(
+              onTap: () {
+                // Cliccando il titolo/blocco, apri la pagina Quests con questType = highPriority
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuestInfoPage(questData: quest),
+                    builder: (context) => const QuestsPage(
+                      questType: QuestType.highPriority,
+                    ),
                   ),
                 );
-                */
               },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quest ad Alta Priorità',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 8.0),
+                  _buildQuestList(
+                    quests: top3HighPriority,
+                    onQuestTap: (quest) {
+                      // Se vuoi aprire i dettagli di una specifica quest
+                      // Navigator.push(...);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24.0),
+
+            // --- Gruppo cliccabile: Quest Giornaliere (solo 3 in dashboard) ---
+            InkWell(
+              onTap: () {
+                // Cliccando il titolo/blocco, apri la pagina Quests con questType = daily
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const QuestsPage(
+                      questType: QuestType.daily,
+                    ),
+                  ),
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quest Giornaliere',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 8.0),
+                  _buildQuestList(
+                    quests: top3Daily,
+                    onQuestTap: (quest) {
+                      // Se vuoi aprire i dettagli di una specifica quest
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -118,38 +162,22 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  // Funzione helper per costruire l'header utente
+  // Widget helper per l'header dell'utente
   Widget _buildUserHeader({
+    required BuildContext context,
     required String userName,
     required int currentLevel,
     required double currentXP,
     required double requiredXP,
     required String userClass,
     required String userAbilities,
-    required BuildContext context,
   }) {
-    // Calcolo percentuale di XP per la barra
     final double xpPercentage = (currentXP / requiredXP).clamp(0.0, 1.0);
 
     return InkWell(
-      // Se l'utente clicca sulla sezione "header",
-      // potrebbe aprire una pagina con i dettagli del livello, classe e abilità
       onTap: () {
-        // Esempio di navigazione ad una pagina "Dettagli Livello"
-        /*
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LivelloDettagliPage(
-              level: currentLevel,
-              xp: currentXP,
-              requiredXp: requiredXP,
-              className: userClass,
-              abilities: userAbilities,
-            ),
-          ),
-        );
-        */
+        // Apri pagina con dettagli livello (non mostrato in questo snippet)
+        // Navigator.push(context, MaterialPageRoute(...));
       },
       child: Card(
         elevation: 4.0,
@@ -173,25 +201,29 @@ class DashboardPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8.0),
-              // Barra dell'esperienza
+
+              // Barra XP
               LinearProgressIndicator(
                 value: xpPercentage,
                 minHeight: 8.0,
                 backgroundColor: Colors.grey[300],
-                // Colore principale, poi potrai usare un tuo tema "Solo Leveling"
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
               ),
               const SizedBox(height: 8.0),
-              // Testo XP attuale / XP necessario
+
+              // XP numeric
               Text(
                 '${currentXP.toInt()} / ${requiredXP.toInt()} XP',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 8.0),
-              // Dettagli sul "ruolo/classe" e abilità
+
+              // Classe e abilità
               Text(
                 'Classe: $userClass',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 4.0),
               Text(
@@ -205,12 +237,11 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  // Funzione helper per costruire una lista di quest (schematica)
+  // Widget helper per mostrare la lista di quest (massimo 3 in Dashboard)
   Widget _buildQuestList({
-    required List<Map<String, String>> quests,
-    required Function(Map<String, String> quest) onQuestTap,
+    required List<QuestData> quests,
+    required Function(QuestData quest) onQuestTap,
   }) {
-    // Ritorna una colonna di Card, ognuna rappresenta una quest
     return Column(
       children: quests.map((quest) {
         return InkWell(
@@ -218,8 +249,10 @@ class DashboardPage extends StatelessWidget {
           child: Card(
             elevation: 2.0,
             child: ListTile(
-              title: Text(quest['title'] ?? 'Quest Sconosciuta'),
-              subtitle: Text('Scadenza: ${quest['deadline'] ?? 'N/A'}'),
+              title: Text(quest.title),
+              subtitle: quest.isDaily
+                  ? const Text('Giornaliera')
+                  : Text('Scadenza: ${quest.deadline.toLocal()}'),
               trailing: const Icon(Icons.arrow_forward_ios),
             ),
           ),
