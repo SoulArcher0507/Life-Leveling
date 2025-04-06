@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/widgets/custom_bottom_navigation_bar.dart';
-// import 'package:tuo_progetto/pages/dashboard/dashboard_page.dart';
+import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
 // import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
 // import 'package:tuo_progetto/pages/quests/quests_page.dart';
 // import 'package:tuo_progetto/pages/grafici/grafici_page.dart';
@@ -26,13 +26,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Lista di pagine corrispondenti alle sezioni.
   // Assicurati di creare e importare le tue vere pagine.
-  final List<Widget> _pages = const [
-    // DashboardPage(),
+  final List<Widget> _pages = [
+    const DashboardPage(),
     // ProgettiPage(),
     // QuestsPage(),
     // GraficiPage(),
     // Per ora metto segnaposto
-    Center(child: Text('Dashboard Page Placeholder')),
     Center(child: Text('Progetti Page Placeholder')),
     Center(child: Text('Quests Page Placeholder')),
     Center(child: Text('Grafici Page Placeholder')),
@@ -64,13 +63,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // BottomNavigationBar per passare tra le 4 sezioni
       bottomNavigationBar: CustomBottomNavigationBar(
-  currentIndex: _currentIndex,
-  onTap: (index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  },
-),
+        currentIndex: _currentIndex,
+        onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+          });
+        },
+      ),
 
     );
   }
