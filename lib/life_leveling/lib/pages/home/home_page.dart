@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/widgets/custom_bottom_navigation_bar.dart';
 import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
+
+import 'package:life_leveling/pages/quests/quests_page.dart';
 // import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
-// import 'package:tuo_progetto/pages/quests/quests_page.dart';
 // import 'package:tuo_progetto/pages/grafici/grafici_page.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -28,6 +29,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // Assicurati di creare e importare le tue vere pagine.
   final List<Widget> _pages = [
     const DashboardPage(),
+
+    const QuestsPage(),
     // ProgettiPage(),
     // QuestsPage(),
     // GraficiPage(),

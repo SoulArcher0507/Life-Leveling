@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-// import 'package:tuo_progetto/pages/dashboard/dashboard_page.dart';
+import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
 // import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
-// import 'package:tuo_progetto/pages/quests/quests_page.dart';
+import 'package:life_leveling/pages/quests/quests_page.dart';
 // import 'package:tuo_progetto/pages/grafici/grafici_page.dart';
 // import 'package:tuo_progetto/pages/settings/settings_page.dart';
 // etc...
@@ -20,6 +20,8 @@ class AppRoutes {
   static Map<String, WidgetBuilder> getRoutes() {
     return {
       home: (context) => const HomePage(),
+      
+      quests: (context) => const QuestsPage(),
       // dashboard: (context) => const DashboardPage(),
       // progetti: (context) => const ProgettiPage(),
       // quests: (context) => const QuestsPage(),
