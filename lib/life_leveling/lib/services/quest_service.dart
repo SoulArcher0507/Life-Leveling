@@ -3,29 +3,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:life_leveling/models/quest_model.dart';
 
 class QuestService {
-  // Singleton per poter chiamare QuestService() ovunque
+  // Singleton: puoi accedere ovunque con QuestService()
   static final QuestService _instance = QuestService._internal();
   factory QuestService() => _instance;
   QuestService._internal();
 
-  // Chiave usata in SharedPreferences
+  // Chiave per salvare in SharedPreferences
   static const String _prefsKey = 'quests_data';
 
-  // Lista interna di quest. Tutte le pagine useranno questa come fonte dati.
+  // Lista di quest condivisa dall'intera app
   final List<QuestData> _allQuests = [];
 
-  // GETTER pubblico: fornisce copia (o riferimento) della lista
-  // Se preferisci, puoi restituire una List immodificabile
+  // Getter per la lista
   List<QuestData> get allQuests => _allQuests;
 
-  /// Inizializza il servizio, caricando le quest da SharedPreferences
+  // Inizializza caricando i dati
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_prefsKey);
-
     if (jsonString != null && jsonString.isNotEmpty) {
       final List decoded = json.decode(jsonString);
-      // Convertiamo ogni mappa nel nostro modello QuestData
       _allQuests.clear();
       for (var item in decoded) {
         _allQuests.add(QuestData.fromJson(item));
@@ -33,32 +30,20 @@ class QuestService {
     }
   }
 
-  /// Aggiunge una quest e salva su SharedPreferences
+  // Aggiunge una quest e salva
   Future<void> addQuest(QuestData quest) async {
     _allQuests.add(quest);
-    await _saveToPrefs();
+    await _save();
   }
 
-  /// Rimuove una quest (se serve)
-  Future<void> removeQuest(QuestData quest) async {
-    _allQuests.remove(quest);
-    await _saveToPrefs();
-  }
+  // Se vuoi rimuovere o aggiornare quest, puoi aggiungere funzioni simili
+  // Future<void> removeQuest(QuestData quest) async { ... }
 
-  /// Aggiorna una quest esistente (se serve)
-  Future<void> updateQuest(QuestData oldQuest, QuestData newQuest) async {
-    final index = _allQuests.indexOf(oldQuest);
-    if (index != -1) {
-      _allQuests[index] = newQuest;
-      await _saveToPrefs();
-    }
-  }
-
-  /// Salva la lista su SharedPreferences (in formato JSON)
-  Future<void> _saveToPrefs() async {
+  // Salva la lista su SharedPreferences
+  Future<void> _save() async {
     final prefs = await SharedPreferences.getInstance();
-    final listMap = _allQuests.map((q) => q.toJson()).toList();
-    final jsonString = json.encode(listMap);
+    final data = _allQuests.map((q) => q.toJson()).toList();
+    final jsonString = json.encode(data);
     await prefs.setString(_prefsKey, jsonString);
   }
 }
