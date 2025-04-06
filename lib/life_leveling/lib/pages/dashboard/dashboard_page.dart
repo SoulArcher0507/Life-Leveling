@@ -1,5 +1,3 @@
-// lib/pages/dashboard/dashboard_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/pages/quests/quests_page.dart';
@@ -12,7 +10,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // Esempio di dati utente
+  // Dati utente (esempio)
   final String userName = 'John Doe';
   final int currentLevel = 5;
   final double currentXP = 120.0;
@@ -21,7 +19,6 @@ class _DashboardPageState extends State<DashboardPage> {
   final String userAbilities = 'Dominion of Shadows, Enhanced Strength...';
 
   // Esempio di quest
-  // In un progetto reale, potresti recuperarli da un DB / Service.
   final List<QuestData> allQuests = [
     QuestData(
       title: 'Progetto Universitario',
@@ -57,16 +54,15 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 1) Separiamo le quest in highPriority (non giornaliere) e daily (giornaliere)
+    // 1) Separiamo le quest in alta priorità vs giornaliere
     final highPriorityQuests = allQuests.where((q) => !q.isDaily).toList();
     final dailyQuests = allQuests.where((q) => q.isDaily).toList();
 
-    // 2) Ordiniamo le highPriority in base alla scadenza
+    // 2) Ordiniamo
     highPriorityQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
-    // Le daily di solito hanno scadenza "oggi" o simile, ma se vuoi puoi ordinarle
     dailyQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
 
-    // 3) Mostriamo solo le prime 3 per la dashboard
+    // 3) Mostriamo 3 e 3
     final top3HighPriority = highPriorityQuests.length > 3
         ? highPriorityQuests.sublist(0, 3)
         : highPriorityQuests;
@@ -79,24 +75,26 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Header utente: cliccando su livello si aprono dettagli (non mostrato qui) ---
-            _buildUserHeader(
-              context: context,
-              userName: userName,
-              currentLevel: currentLevel,
-              currentXP: currentXP,
-              requiredXP: requiredXP,
-              userClass: userClass,
-              userAbilities: userAbilities,
+            // --- Box Livello/XP Utente ---
+            _buildDashboardCard(
+              // Per uniformare lo stile, usiamo la stessa logica di base (Card con Padding)
+              child: _buildUserHeader(
+                context: context,
+                userName: userName,
+                currentLevel: currentLevel,
+                currentXP: currentXP,
+                requiredXP: requiredXP,
+                userClass: userClass,
+                userAbilities: userAbilities,
+              ),
             ),
             const SizedBox(height: 24.0),
 
-            // --- Gruppo cliccabile: Quest ad Alta Priorità (solo 3 in dashboard) ---
-            InkWell(
+            // --- Box Quest ad Alta Priorità ---
+            _buildDashboardCard(
               onTap: () {
-                // Cliccando il titolo/blocco, apri la pagina Quests con questType = highPriority
+                // Clic sull'intero box
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -117,8 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   _buildQuestList(
                     quests: top3HighPriority,
                     onQuestTap: (quest) {
-                      // Se vuoi aprire i dettagli di una specifica quest
-                      // Navigator.push(...);
+                      // Clic su una singola quest
                     },
                   ),
                 ],
@@ -126,10 +123,9 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 24.0),
 
-            // --- Gruppo cliccabile: Quest Giornaliere (solo 3 in dashboard) ---
-            InkWell(
+            // --- Box Quest Giornaliere ---
+            _buildDashboardCard(
               onTap: () {
-                // Cliccando il titolo/blocco, apri la pagina Quests con questType = daily
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -150,7 +146,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   _buildQuestList(
                     quests: top3Daily,
                     onQuestTap: (quest) {
-                      // Se vuoi aprire i dettagli di una specifica quest
+                      // Clic su una singola quest
                     },
                   ),
                 ],
@@ -162,7 +158,27 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Widget helper per l'header dell'utente
+  /// Helper per costruire un "box" in stile Card con lo stesso design
+  /// Se `onTap` è non nullo, avvolgiamo il Card in un InkWell, così l'intero box è cliccabile.
+  Widget _buildDashboardCard({
+    required Widget child,
+    VoidCallback? onTap,
+  }) {
+    return Card(
+      elevation: 4.0,
+      clipBehavior: Clip
+          .antiAlias, // consente di avere la ripple effect su tutto il card se cliccato
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  // ----- Header con livello, XP, classe, abilità -----
   Widget _buildUserHeader({
     required BuildContext context,
     required String userName,
@@ -175,69 +191,63 @@ class _DashboardPageState extends State<DashboardPage> {
     final double xpPercentage = (currentXP / requiredXP).clamp(0.0, 1.0);
 
     return InkWell(
+      // Se vuoi rendere l'header cliccabile anche separatamente dal card, aggiungi onTap qui
       onTap: () {
-        // Apri pagina con dettagli livello (non mostrato in questo snippet)
-        // Navigator.push(context, MaterialPageRoute(...));
+        // Apri pagina con dettagli livello
       },
-      child: Card(
-        elevation: 4.0,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Nome e livello
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Nome e livello
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    userName,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    'Livello $currentLevel',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8.0),
-
-              // Barra XP
-              LinearProgressIndicator(
-                value: xpPercentage,
-                minHeight: 8.0,
-                backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-              ),
-              const SizedBox(height: 8.0),
-
-              // XP numeric
               Text(
-                '${currentXP.toInt()} / ${requiredXP.toInt()} XP',
-                style: Theme.of(context).textTheme.bodyMedium,
+                userName,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-              const SizedBox(height: 8.0),
-
-              // Classe e abilità
               Text(
-                'Classe: $userClass',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                'Abilità: $userAbilities',
+                'Livello $currentLevel',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 8.0),
+
+          // Barra XP
+          LinearProgressIndicator(
+            value: xpPercentage,
+            minHeight: 8.0,
+            backgroundColor: Colors.grey[300],
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+          ),
+          const SizedBox(height: 8.0),
+
+          // XP numeric
+          Text(
+            '${currentXP.toInt()} / ${requiredXP.toInt()} XP',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8.0),
+
+          // Classe e abilità
+          Text(
+            'Classe: $userClass',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            'Abilità: $userAbilities',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
       ),
     );
   }
 
-  // Widget helper per mostrare la lista di quest (massimo 3 in Dashboard)
+  // ----- Lista di quest (max 3 in Dashboard) -----
   Widget _buildQuestList({
     required List<QuestData> quests,
     required Function(QuestData quest) onQuestTap,
