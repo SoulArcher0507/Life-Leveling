@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
+// import 'package:tuo_progetto/pages/dashboard/dashboard_page.dart';
 // import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
 // import 'package:tuo_progetto/pages/quests/quests_page.dart';
 // import 'package:tuo_progetto/pages/grafici/grafici_page.dart';
@@ -20,7 +20,7 @@ class AppRoutes {
   static Map<String, WidgetBuilder> getRoutes() {
     return {
       home: (context) => const HomePage(),
-      dashboard: (context) => const DashboardPage(),
+      // dashboard: (context) => const DashboardPage(),
       // progetti: (context) => const ProgettiPage(),
       // quests: (context) => const QuestsPage(),
       // grafici: (context) => const GraficiPage(),
@@ -31,7 +31,7 @@ class AppRoutes {
 
 // Esempio di HomePage, se non l’hai già definita altrove
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

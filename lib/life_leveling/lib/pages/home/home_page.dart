@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:life_leveling/widgets/custom_bottom_navigation_bar.dart';
 // import 'package:tuo_progetto/pages/dashboard/dashboard_page.dart';
 // import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
 // import 'package:tuo_progetto/pages/quests/quests_page.dart';
@@ -62,33 +63,15 @@ class _MyHomePageState extends State<MyHomePage> {
       body: _pages[_currentIndex],
 
       // BottomNavigationBar per passare tra le 4 sezioni
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.work),
-            label: 'Progetti',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check_circle),
-            label: 'Quests',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Grafici',
-          ),
-        ],
-        onTap: (int index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+  currentIndex: _currentIndex,
+  onTap: (index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  },
+),
+
     );
   }
 }

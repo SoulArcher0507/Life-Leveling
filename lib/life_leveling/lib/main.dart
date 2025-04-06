@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 // import 'package:tuo_progetto/theme/solo_leveling_theme.dart';
 // import 'package:tuo_progetto/routes/app_routes.dart';
 // import 'package:tuo_progetto/pages/settings/settings_page.dart';
-import '/pages/home/home_page.dart';
+import 'package:life_leveling/pages/home/home_page.dart';
+
+/*
+  main.dart è il punto di ingresso dell’app.
+  Gestisce il MaterialApp, il tema e la home iniziale.
+*/
 
 void main() {
   runApp(const MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
