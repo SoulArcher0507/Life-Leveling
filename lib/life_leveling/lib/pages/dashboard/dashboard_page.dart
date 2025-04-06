@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/pages/quests/quests_page.dart';
+import 'package:life_leveling/services/quest_service.dart';
+import 'package:life_leveling/pages/dashboard/livello_dettagli_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -18,54 +20,13 @@ class _DashboardPageState extends State<DashboardPage> {
   final String userClass = 'Shadow Monarch';
   final String userAbilities = 'Dominion of Shadows, Enhanced Strength...';
 
-  // Esempio di quest
-  final List<QuestData> allQuests = [
-    QuestData(
-      title: 'Progetto Universitario',
-      deadline: DateTime(2025, 5, 10),
-      isDaily: false,
-      xp: 50,              // Assegna un valore, ad es. 50
-      notes: ""
-    ),
-    QuestData(
-      title: 'Refactoring App Flutter',
-      deadline: DateTime(2025, 5, 15),
-      isDaily: false,
-      xp: 50,              // Assegna un valore, ad es. 50
-      notes: ""
-    ),
-    QuestData(
-      title: 'Workout mattutino',
-      deadline: DateTime.now(),
-      isDaily: true,
-      xp: 50,              // Assegna un valore, ad es. 50
-      notes: ""
-    ),
-    QuestData(
-      title: 'Lavare i denti',
-      deadline: DateTime.now(),
-      isDaily: true,
-      xp: 50,              // Assegna un valore, ad es. 50
-      notes: ""
-    ),
-    QuestData(
-      title: 'Studiare Inglese',
-      deadline: DateTime(2025, 4, 15),
-      isDaily: false,
-      xp: 50,              // Assegna un valore, ad es. 50
-      notes: ""
-    ),
-    QuestData(
-      title: 'Pulire la stanza',
-      deadline: DateTime.now(),
-      isDaily: true,
-      xp: 50,              // Assegna un valore, ad es. 50
-      notes: ""
-    ),
-  ];
+  
 
   @override
   Widget build(BuildContext context) {
+    // Recuperiamo l'elenco delle quest dal servizio
+    final allQuests = QuestService().allQuests;
+
     // 1) Separiamo le quest in alta priorità vs giornaliere
     final highPriorityQuests = allQuests.where((q) => !q.isDaily).toList();
     final dailyQuests = allQuests.where((q) => q.isDaily).toList();
@@ -205,7 +166,20 @@ class _DashboardPageState extends State<DashboardPage> {
     return InkWell(
       // Se vuoi rendere l'header cliccabile anche separatamente dal card, aggiungi onTap qui
       onTap: () {
-        // Apri pagina con dettagli livello
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LivelloDettagliPage(
+              userName: userName,
+              currentLevel: currentLevel,
+              currentXP: currentXP,
+              requiredXP: requiredXP,
+              userClass: userClass,
+              userAbilities: userAbilities,
+            ),
+          ),
+        );
+
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
