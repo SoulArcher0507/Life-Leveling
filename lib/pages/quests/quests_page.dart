@@ -112,9 +112,6 @@ class _QuestsPageState extends State<QuestsPage> {
     ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Le Tue Quests (settimanale)'),
-      ),
       body: Column(
         children: [
           Padding(
@@ -167,10 +164,6 @@ class _QuestsPageState extends State<QuestsPage> {
           _buildDaysOfWeekRow(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              'Data selezionata: ${selectedDate.toLocal()}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -321,94 +314,203 @@ class _QuestsPageState extends State<QuestsPage> {
     bool repeatedWeekly = false;
     bool userIsDaily = isDaily ?? false;
 
-    // Mostriamo lo stesso AlertDialog di prima
+    final xpPresets = {
+      'Facile': 10,
+      'Media': 25,
+      'Difficile': 50,
+      'Molto Difficile': 100,
+    };
+    String selectedXpPreset = 'Personalizzato';
+
+    List<bool> selectedWeekDays = List.filled(7, false);
+    final weekDayLabels = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+    DateTime? repeatUntil;
+
+    DateTime? selectedDeadline;
+    DateTimeRange? selectedDateRange;
+
+    // AlertDialog
     return showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Crea Nuova Quest'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Titolo Quest'),
-                ),
-                TextField(
-                  controller: xpController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'XP da Assegnare'),
-                ),
-                TextField(
-                  controller: notesController,
-                  decoration: const InputDecoration(labelText: 'Note'),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return StatefulBuilder(
+          builder: (ctx2, setState) {
+            return AlertDialog(
+              title: const Text('Crea Nuova Quest'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('È Giornaliera?'),
-                    Switch(
-                      value: userIsDaily,
-                      onChanged: (val) {
-                        setState(() {
-                          userIsDaily = val;
-                        });
-                      },
+                    
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ChoiceChip(
+                          label: const Text('Giornaliera'),
+                          selected: userIsDaily,
+                          onSelected: (sel) => setState(() => userIsDaily = true),
+                        ),
+                        const SizedBox(width: 12),
+                        ChoiceChip(
+                          label: const Text('Alta Priorità'),
+                          selected: !userIsDaily,
+                          onSelected: (sel) => setState(() => userIsDaily = false),
+                        ),
+                      ],
                     ),
+                    
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Titolo Quest'),
+                    ),
+                    
+                    
+                    const SizedBox(height: 16),
+
+                    Row(  // XP con preset + personalizzato
+                      children: [
+                        // Dropdown dei preset
+                        Expanded(
+                          flex: 2,
+                          child: DropdownButtonFormField<String>(
+                            value: selectedXpPreset,
+                            decoration: const InputDecoration(labelText: 'Preset XP'),
+                            items: [
+                              ...xpPresets.keys.map((k) =>
+                                DropdownMenuItem(value: k, child: Text('$k (${xpPresets[k]})'))
+                              ),
+                              const DropdownMenuItem(value: 'Personalizzato', child: Text('Personalizzato')),
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                selectedXpPreset = val!;
+                                if (xpPresets.containsKey(val)) {
+                                  xpController.text = xpPresets[val]!.toString();
+                                } else {
+                                  xpController.clear();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Campo per personalizzare/visualizzare XP
+                        Expanded(
+                          flex: 1,
+                          child: TextField(
+                            controller: xpController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(labelText: 'XP'),
+                          ),
+                        ),
+                      ],
+                    ),
+
+
+
+                    TextField(
+                      controller: notesController,
+                      decoration: const InputDecoration(labelText: 'Note'),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+                    // *** PICKER DATA / DATE RANGE ***
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(userIsDaily ? 'Intervallo date' : 'Scadenza'),            // << RIGA AGGIUNTA
+                        TextButton(
+                          onPressed: () async {
+                            if (userIsDaily) {
+                              final range = await showDateRangePicker(
+                                context: ctx2,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                                initialDateRange: selectedDateRange,
+                              );
+                              if (range != null) {
+                                setState(() => selectedDateRange = range);            // << RIGA AGGIUNTA
+                              }
+                            } else {
+                              final date = await showDatePicker(
+                                context: ctx2,
+                                initialDate: selectedDeadline ?? DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (date != null) {
+                                setState(() => selectedDeadline = date);              // << RIGA AGGIUNTA
+                              }
+                            }
+                          },
+                          child: Text(
+                            userIsDaily
+                                ? (selectedDateRange == null
+                                    ? 'Scegli date'
+                                    : '${DateFormat('dd/MM/yyyy').format(selectedDateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(selectedDateRange!.end)}')
+                                : (selectedDeadline == null
+                                    ? 'Scegli data'
+                                    : DateFormat('dd/MM/yyyy').format(selectedDeadline!)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // *** END PICKER ***
+
+
+
+
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Ripeti settimanalmente?'),
-                    Switch(
-                      value: repeatedWeekly,
-                      onChanged: (val) {
-                        setState(() {
-                          repeatedWeekly = val;
-                        });
-                      },
-                    ),
-                  ],
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('ANNULLA'),
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+                ElevatedButton(
+                  child: const Text('CREA'),
+                  onPressed: () async {
+                    final newTitle = titleController.text.trim();
+                    final newXp = int.tryParse(xpController.text.trim()) ?? 0;
+                    final newNotes = notesController.text.trim();
+
+                    if (newTitle.isNotEmpty) {
+                      // scelgo la data da passare al modello
+                      final deadlineToUse = userIsDaily
+                          ? (selectedDateRange?.start ?? DateTime.now())           
+                          : (selectedDeadline ?? DateTime.now());
+
+                      final newQuest = QuestData(
+                        title: newTitle,
+                        deadline: DateTime.now(),
+                        isDaily: userIsDaily,
+                        xp: newXp,
+                        notes: newNotes,
+                      );
+
+                      // Aggiunta al QuestService, invece di _allQuests
+                      await QuestService().addQuest(newQuest);
+
+                      Navigator.of(ctx2).pop();
+                      setState(() {});  // ricarica la lista
+                    } else {
+                      // ...
+                    }
+                  },
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('ANNULLA'),
-              onPressed: () => Navigator.of(ctx).pop(),
-            ),
-            ElevatedButton(
-              child: const Text('CREA'),
-              onPressed: () async {
-                final newTitle = titleController.text.trim();
-                final newXp = int.tryParse(xpController.text.trim()) ?? 0;
-                final newNotes = notesController.text.trim();
-
-                if (newTitle.isNotEmpty) {
-                  final newQuest = QuestData(
-                    title: newTitle,
-                    deadline: DateTime.now(),
-                    isDaily: userIsDaily,
-                    xp: newXp,
-                    notes: newNotes,
-                  );
-
-                  // Aggiunta al QuestService, invece di _allQuests
-                  await QuestService().addQuest(newQuest);
-
-                  Navigator.of(ctx).pop();
-                  setState(() {});
-                } else {
-                  // ...
-                }
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
