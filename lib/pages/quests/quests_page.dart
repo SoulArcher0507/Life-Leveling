@@ -415,56 +415,74 @@ class _QuestsPageState extends State<QuestsPage> {
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        
-                      ],
-                    ),
 
-                    const SizedBox(height: 16),
-                    // *** PICKER DATA / DATE RANGE ***
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(userIsDaily ? 'Intervallo date' : 'Scadenza'),            // << RIGA AGGIUNTA
-                        TextButton(
-                          onPressed: () async {
-                            if (userIsDaily) {
-                              final range = await showDateRangePicker(
+                    // **PICKER DATA / SELEZIONE GIORNI**  
+                    if (userIsDaily) ...[
+                      // Selezione giorni settimana
+                      Wrap(
+                        spacing: 4,
+                        children: List.generate(7, (i) {
+                          return FilterChip(
+                            label: Text(weekDayLabels[i]),
+                            selected: selectedWeekDays[i],
+                            onSelected: (sel) => setState(() => selectedWeekDays[i] = sel),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 8),
+                      // Data fine ripetizione
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Ripeti fino a'),
+                          TextButton(
+                            onPressed: () async {
+                              final picked = await showDatePicker(
                                 context: ctx2,
-                                firstDate: DateTime(2000),
+                                initialDate: repeatUntil ?? DateTime.now(),
+                                firstDate: DateTime.now(),
                                 lastDate: DateTime(2100),
-                                initialDateRange: selectedDateRange,
                               );
-                              if (range != null) {
-                                setState(() => selectedDateRange = range);            // << RIGA AGGIUNTA
-                              }
-                            } else {
-                              final date = await showDatePicker(
+                              if (picked != null) setState(() => repeatUntil = picked);
+                            },
+                            child: Text(
+                              repeatUntil == null
+                                ? 'Scegli data'
+                                : DateFormat('dd/MM/yyyy').format(repeatUntil!),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ] else ...[
+                      // Non-daily: picker singola data
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Scadenza'),
+                          TextButton(
+                            onPressed: () async {
+                              final picked = await showDatePicker(
                                 context: ctx2,
                                 initialDate: selectedDeadline ?? DateTime.now(),
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime(2100),
                               );
-                              if (date != null) {
-                                setState(() => selectedDeadline = date);              // << RIGA AGGIUNTA
-                              }
-                            }
-                          },
-                          child: Text(
-                            userIsDaily
-                                ? (selectedDateRange == null
-                                    ? 'Scegli date'
-                                    : '${DateFormat('dd/MM/yyyy').format(selectedDateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(selectedDateRange!.end)}')
-                                : (selectedDeadline == null
-                                    ? 'Scegli data'
-                                    : DateFormat('dd/MM/yyyy').format(selectedDeadline!)),
+                              if (picked != null) setState(() => selectedDeadline = picked);
+                            },
+                            child: Text(
+                              selectedDeadline == null
+                                ? 'Scegli data'
+                                : DateFormat('dd/MM/yyyy').format(selectedDeadline!),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    // *** END PICKER ***
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+
+                    
 
 
 
