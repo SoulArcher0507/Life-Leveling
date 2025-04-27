@@ -36,7 +36,7 @@ class QuestService {
     await _save();
   }
 
-  // Se vuoi rimuovere o aggiornare quest, puoi aggiungere funzioni simili
+  // Per rimuovere o aggiornare quest, aggiungere funzioni simili
   // Future<void> removeQuest(QuestData quest) async { ... }
 
   // Salva la lista su SharedPreferences
@@ -46,4 +46,20 @@ class QuestService {
     final jsonString = json.encode(data);
     await prefs.setString(_prefsKey, jsonString);
   }
+
+  Future<void> removeQuest(QuestData quest) async {
+    _allQuests.remove(quest);
+    await _save();
+  }
+
+  /// Aggiorna una quest esistente (sostituisce oldQuest con newQuest)
+  Future<void> updateQuest(QuestData oldQuest, QuestData newQuest) async {
+    final idx = _allQuests.indexOf(oldQuest);
+    if (idx != -1) {
+      _allQuests[idx] = newQuest;
+      await _save();
+    }
+  }
 }
+// memoria persistente a lungo termine
+// tutto in un file, tool esterno per estrarre evenutalmente

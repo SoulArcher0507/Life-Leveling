@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
+import 'package:intl/intl.dart';
+import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 
 class QuestsPage extends StatefulWidget {
   final QuestType? questType;
@@ -89,6 +91,8 @@ class _QuestsPageState extends State<QuestsPage> {
     );
   }
 
+  
+
   // ---------------------------------------------
   // 2) Vista settimanale
   // ---------------------------------------------
@@ -96,13 +100,16 @@ class _QuestsPageState extends State<QuestsPage> {
     final selectedDate = _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex));
 
     // Filtriamo le quest ad alta priorità
-    final highPriorityQuests = QuestService().allQuests.where((q) {
-      if (q.isDaily) return false;
-      return isSameDay(q.deadline, selectedDate);
-    }).toList();
+    final highPriorityQuests = QuestService().allQuests
+      .where((q) => !q.isDaily)
+      .toList()
+    ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
     // Filtriamo le quest giornaliere
-    final dailyQuests = QuestService().allQuests.where((q) => q.isDaily).toList();
+    final dailyQuests = QuestService().allQuests
+      .where((q) => q.isDaily)
+      .toList()
+    ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
     return Scaffold(
       appBar: AppBar(
@@ -110,6 +117,53 @@ class _QuestsPageState extends State<QuestsPage> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() {
+                      _mondayOfCurrentWeek = _mondayOfCurrentWeek.subtract(const Duration(days: 7));  
+                      _selectedDayIndex = 0;                                                           
+                    });
+                  },
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: _mondayOfCurrentWeek,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        // ricavo il Lunedì della settimana scelta
+                        _mondayOfCurrentWeek = picked.subtract(Duration(days: picked.weekday - 1));  
+                        _selectedDayIndex = 0;                                                         
+                      });
+                    }
+                  },
+                  child: Text(
+                    DateFormat('MMMM yyyy').format(_mondayOfCurrentWeek),                        
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () {
+                    setState(() {
+                      _mondayOfCurrentWeek = _mondayOfCurrentWeek.add(const Duration(days: 7));    
+                      _selectedDayIndex = 0;                                                         
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           _buildDaysOfWeekRow(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -151,7 +205,7 @@ class _QuestsPageState extends State<QuestsPage> {
       ),
     );
   }
-
+// da importare pacchetto esterno per calendario
   Widget _buildDaysOfWeekRow() {
     final List<Widget> dayWidgets = [];
     for (int i = 0; i < 7; i++) {
@@ -240,7 +294,12 @@ class _QuestsPageState extends State<QuestsPage> {
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
-                        // Dettagli quest, se vuoi
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => QuestDetailsPage(quest: quest),
+                          ),
+                        );
                       },
                     ),
                   );
@@ -355,7 +414,10 @@ class _QuestsPageState extends State<QuestsPage> {
     );
   }
 
+
+
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }
+

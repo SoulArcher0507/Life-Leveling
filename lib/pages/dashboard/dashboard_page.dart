@@ -3,6 +3,7 @@ import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/pages/quests/quests_page.dart';
 import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/pages/dashboard/livello_dettagli_page.dart';
+import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -24,18 +25,18 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Recuperiamo l'elenco delle quest dal servizio
+    // Elenco delle quest dal servizio
     final allQuests = QuestService().allQuests;
 
-    // 1) Separiamo le quest in alta priorità vs giornaliere
+    // Separiamo le quest in alta priorità vs giornaliere
     final highPriorityQuests = allQuests.where((q) => !q.isDaily).toList();
     final dailyQuests = allQuests.where((q) => q.isDaily).toList();
 
-    // 2) Ordiniamo
+    // Ordiniamo
     highPriorityQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
     dailyQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
 
-    // 3) Mostriamo 3 e 3
+    // Mostriamo 3 e 3
     final top3HighPriority = highPriorityQuests.length > 3
         ? highPriorityQuests.sublist(0, 3)
         : highPriorityQuests;
@@ -51,7 +52,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             // --- Box Livello/XP Utente ---
             _buildDashboardCard(
-              // Per uniformare lo stile, usiamo la stessa logica di base (Card con Padding)
+              // Per uniformare lo stile, usiamo Card con Padding
               child: _buildUserHeader(
                 context: context,
                 userName: userName,
@@ -249,7 +250,14 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       children: quests.map((quest) {
         return InkWell(
-          onTap: () => onQuestTap(quest),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => QuestDetailsPage(quest: quest),
+              ),
+            );
+          },
           child: Card(
             elevation: 2.0,
             child: ListTile(
