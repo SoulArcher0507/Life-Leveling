@@ -502,28 +502,52 @@ class _QuestsPageState extends State<QuestsPage> {
                     final newXp = int.tryParse(xpController.text.trim()) ?? 0;
                     final newNotes = notesController.text.trim();
 
-                    if (newTitle.isNotEmpty) {
-                      // scelgo la data da passare al modello
-                      final deadlineToUse = userIsDaily
-                          ? (selectedDateRange?.start ?? DateTime.now())           
-                          : (selectedDeadline ?? DateTime.now());
+                    if (newTitle.isEmpty) return;
 
-                      final newQuest = QuestData(
+                    if (userIsDaily) {
+                      // 1) parto da oggi a mezzanotte
+                      final now = DateTime.now();
+                      final startDate = DateTime(now.year, now.month, now.day);
+
+                      // 2) arrivo a repeatUntil (o a oggi se non impostato)
+                      final endDate = repeatUntil != null
+                          ? DateTime(repeatUntil!.year, repeatUntil!.month, repeatUntil!.day)
+                          : startDate;
+
+                      // 3) genero solo se ho selezionato almeno un giorno
+                      if (selectedWeekDays.any((sel) => sel)) {
+                        for (var d = startDate; !d.isAfter(endDate); d = d.add(const Duration(days: 1))) {
+                          final idx = d.weekday - 1; // Lun=1→0 … Dom=7→6
+                          if (selectedWeekDays[idx]) {
+                            final q = QuestData(
+                              title: newTitle,
+                              deadline: d,
+                              isDaily: true,
+                              xp: newXp,
+                              notes: newNotes,
+                              repeatedWeekly: true,
+                            );
+                            await QuestService().addQuest(q);
+                          }
+                        }
+                      }
+                    } else {
+                      // non-daily: singola quest con la data scelta (o oggi)
+                      final d = selectedDeadline != null
+                          ? DateTime(selectedDeadline!.year, selectedDeadline!.month, selectedDeadline!.day)
+                          : DateTime.now();
+                      final q = QuestData(
                         title: newTitle,
-                        deadline: DateTime.now(),
-                        isDaily: userIsDaily,
+                        deadline: d,
+                        isDaily: false,
                         xp: newXp,
                         notes: newNotes,
                       );
-
-                      // Aggiunta al QuestService, invece di _allQuests
-                      await QuestService().addQuest(newQuest);
-
-                      Navigator.of(ctx2).pop();
-                      setState(() {});  // ricarica la lista
-                    } else {
-                      // ...
+                      await QuestService().addQuest(q);
                     }
+
+                    Navigator.of(context).pop();
+                    setState(() {});
                   },
                 ),
               ],
