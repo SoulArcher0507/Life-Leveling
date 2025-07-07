@@ -18,7 +18,7 @@ class QuestDetailsPage extends StatelessWidget {
             onPressed: () async {
               // elimina e torna indietro
               await QuestService().removeQuest(quest);
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(true);
             },
           ),
           IconButton(
@@ -36,7 +36,9 @@ class QuestDetailsPage extends StatelessWidget {
           children: [
             Text('Titolo: ${quest.title}', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text('Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}'),
+            Text(
+              "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
+            ),
             const SizedBox(height: 8),
             Text('XP: ${quest.xp}'),
             const SizedBox(height: 8),
