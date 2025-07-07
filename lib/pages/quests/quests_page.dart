@@ -61,7 +61,8 @@ class _QuestsPageState extends State<QuestsPage> {
     // PRIMA: final filteredQuests = _allQuests.where(...)
     // ORA: usiamo QuestService().allQuests
     final filteredQuests =
-        QuestService().allQuests.where((q) => q.isDaily == isDaily).toList();
+        QuestService().allQuests.where((q) => q.isDaily == isDaily).toList()
+          ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
     return Scaffold(
       appBar: AppBar(
@@ -73,10 +74,20 @@ class _QuestsPageState extends State<QuestsPage> {
           final quest = filteredQuests[index];
           return Card(
             child: ListTile(
-              title: Text(quest.title),
+              title: Text(
+                quest.title,
+                style:
+                    TextStyle(color: _isOverdue(quest) ? Colors.red : null),
+              ),
               subtitle: quest.isDaily
-                  ? const Text('Quest Giornaliera')
-                  : Text('Scadenza: ...'),
+                  ? Text('Quest Giornaliera',
+                      style:
+                          TextStyle(color: _isOverdue(quest) ? Colors.red : null))
+                  : Text(
+                      'Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}',
+                      style:
+                          TextStyle(color: _isOverdue(quest) ? Colors.red : null),
+                    ),
               trailing: const Icon(Icons.arrow_forward_ios),
             ),
           );
@@ -100,17 +111,17 @@ class _QuestsPageState extends State<QuestsPage> {
   Widget _buildWeeklyScaffold(BuildContext context) {
     final selectedDate = _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex));
 
-    // Filtriamo le quest ad alta priorità
+    // Filtriamo le quest ad alta priorità per il giorno selezionato
     final highPriorityQuests = QuestService().allQuests
-      .where((q) => !q.isDaily)
-      .toList()
-    ..sort((a, b) => a.deadline.compareTo(b.deadline));
+        .where((q) => !q.isDaily && isSameDay(q.deadline, selectedDate))
+        .toList()
+      ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
-    // Filtriamo le quest giornaliere
+    // Filtriamo le quest giornaliere per il giorno selezionato
     final dailyQuests = QuestService().allQuests
-      .where((q) => q.isDaily)
-      .toList()
-    ..sort((a, b) => a.deadline.compareTo(b.deadline));
+        .where((q) => q.isDaily && isSameDay(q.deadline, selectedDate))
+        .toList()
+      ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
     return Scaffold(
       body: Column(
@@ -280,11 +291,17 @@ class _QuestsPageState extends State<QuestsPage> {
                   return Card(
                     elevation: 2.0,
                     child: ListTile(
-                      title: Text(quest.title),
+                      title: Text(
+                        quest.title,
+                        style:
+                            TextStyle(color: _isOverdue(quest) ? Colors.red : null),
+                      ),
                       subtitle: Text(
                         quest.isDaily
                             ? 'Quest Giornaliera'
-                            : 'Scadenza: ${quest.deadline.toLocal()}',
+                            : 'Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}',
+                        style:
+                            TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () {
@@ -323,6 +340,13 @@ class _QuestsPageState extends State<QuestsPage> {
 
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  bool _isOverdue(QuestData q) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final questDate = DateTime(q.deadline.year, q.deadline.month, q.deadline.day);
+    return questDate.isBefore(today);
   }
 }
 
