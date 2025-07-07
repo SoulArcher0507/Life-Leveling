@@ -4,6 +4,7 @@ import 'package:life_leveling/pages/quests/quests_page.dart';
 import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/pages/dashboard/livello_dettagli_page.dart';
 import 'package:life_leveling/pages/quests/quest_detail_page.dart';
+import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -20,6 +21,14 @@ class _DashboardPageState extends State<DashboardPage> {
   final double requiredXP = 10.0;
   final String userClass = 'Principiante';
   final String userAbilities = 'Vivere';
+
+  bool _isOverdue(QuestData quest) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final questDate =
+        DateTime(quest.deadline.year, quest.deadline.month, quest.deadline.day);
+    return questDate.isBefore(today);
+  }
 
   
 
@@ -247,7 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    return Column(
+  return Column(
       children: quests.map((quest) {
         return InkWell(
           onTap: () {
@@ -261,10 +270,21 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Card(
             elevation: 2.0,
             child: ListTile(
-              title: Text(quest.title),
+              title: Text(
+                quest.title,
+                style: TextStyle(color: _isOverdue(quest) ? Colors.red : null),
+              ),
               subtitle: quest.isDaily
-                  ? const Text('Giornaliera')
-                  : Text('Scadenza: ${quest.deadline.toLocal()}'),
+                  ? Text(
+                      'Giornaliera',
+                      style:
+                          TextStyle(color: _isOverdue(quest) ? Colors.red : null),
+                    )
+                  : Text(
+                      'Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}',
+                      style:
+                          TextStyle(color: _isOverdue(quest) ? Colors.red : null),
+                    ),
               trailing: const Icon(Icons.arrow_forward_ios),
             ),
           ),

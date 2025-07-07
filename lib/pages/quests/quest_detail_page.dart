@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
+import 'package:intl/intl.dart';
 
 class QuestDetailsPage extends StatelessWidget {
   final QuestData quest;
@@ -35,7 +36,7 @@ class QuestDetailsPage extends StatelessWidget {
           children: [
             Text('Titolo: ${quest.title}', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
-            Text('Scadenza: ${quest.deadline.toLocal()}'),
+            Text('Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}'),
             const SizedBox(height: 8),
             Text('XP: ${quest.xp}'),
             const SizedBox(height: 8),
