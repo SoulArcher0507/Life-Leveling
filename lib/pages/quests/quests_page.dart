@@ -84,11 +84,20 @@ class _QuestsPageState extends State<QuestsPage> {
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null))
                   : Text(
-                      'Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}',
+                      "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                     ),
               trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () async {
+                final deleted = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuestDetailsPage(quest: quest),
+                  ),
+                );
+                if (deleted == true) setState(() {});
+              },
             ),
           );
         },
@@ -299,18 +308,19 @@ class _QuestsPageState extends State<QuestsPage> {
                       subtitle: Text(
                         quest.isDaily
                             ? 'Quest Giornaliera'
-                            : 'Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}',
+                            : "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
                         style:
                             TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        final deleted = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => QuestDetailsPage(quest: quest),
                           ),
                         );
+                        if (deleted == true) setState(() {});
                       },
                     ),
                   );

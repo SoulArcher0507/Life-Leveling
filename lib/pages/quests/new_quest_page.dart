@@ -33,6 +33,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
   DateTime? repeatUntil;
 
   DateTime? selectedDeadline;
+  TimeOfDay? selectedDeadlineTime;
 
   int fatigue = 0;
 
@@ -192,6 +193,29 @@ class _NewQuestPageState extends State<NewQuestPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Ora (opzionale)'),
+                  TextButton(
+                    onPressed: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: selectedDeadlineTime ?? TimeOfDay.now(),
+                      );
+                      if (picked != null) {
+                        setState(() => selectedDeadlineTime = picked);
+                      }
+                    },
+                    child: Text(
+                      selectedDeadlineTime == null
+                          ? 'Scegli ora'
+                          : selectedDeadlineTime!.format(context),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
             ],
             const SizedBox(height: 20),
@@ -239,9 +263,16 @@ class _NewQuestPageState extends State<NewQuestPage> {
         }
       }
     } else {
-      final d = selectedDeadline != null
+      final baseDate = selectedDeadline != null
           ? DateTime(selectedDeadline!.year, selectedDeadline!.month, selectedDeadline!.day)
           : DateTime.now();
+      final d = DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        selectedDeadlineTime?.hour ?? 0,
+        selectedDeadlineTime?.minute ?? 0,
+      );
       final q = QuestData(
         title: newTitle,
         deadline: d,
