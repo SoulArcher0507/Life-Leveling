@@ -20,6 +20,7 @@ class QuestData {
   final int xp;              // punti esperienza assegnati alla quest
   final String notes;        // note aggiuntive
   final bool repeatedWeekly; // se la quest si ripete settimanalmente
+  final int fatigue;         // difficoltà della quest (0-100)
 
   QuestData({
     required this.title,
@@ -29,6 +30,7 @@ class QuestData {
     required this.xp,
     required this.notes,
     this.repeatedWeekly = false, // default = false
+    this.fatigue = 0,
   });
 
 // Converte un QuestData in Map<String, dynamic> (per JSON)
@@ -40,6 +42,7 @@ class QuestData {
       'xp': xp,
       'notes': notes,
       'repeatedWeekly': repeatedWeekly,
+      'fatigue': fatigue,
     };
   }
 
@@ -52,6 +55,7 @@ class QuestData {
       xp: json['xp'] as int,
       notes: json['notes'] as String,
       repeatedWeekly: json['repeatedWeekly'] as bool,
+      fatigue: (json['fatigue'] ?? 0) as int,
     );
   }
 

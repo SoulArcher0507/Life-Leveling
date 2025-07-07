@@ -3,6 +3,7 @@ import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
 import 'package:intl/intl.dart';
 import 'package:life_leveling/pages/quests/quest_detail_page.dart';
+import 'package:life_leveling/pages/quests/new_quest_page.dart';
 
 class QuestsPage extends StatefulWidget {
   final QuestType? questType;
@@ -83,7 +84,7 @@ class _QuestsPageState extends State<QuestsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await _showCreateQuestDialog(context, isDaily: isDaily);
+          await _openCreateQuestPage(context, isDaily: isDaily);
           setState(() {});
         },
         child: const Icon(Icons.add),
@@ -191,7 +192,7 @@ class _QuestsPageState extends State<QuestsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await _showCreateQuestDialog(context, isDaily: null);
+          await _openCreateQuestPage(context, isDaily: null);
           setState(() {});
         },
         child: const Icon(Icons.add),
@@ -305,258 +306,18 @@ class _QuestsPageState extends State<QuestsPage> {
   }
 
   // -----------------------------------------
-  // Creazione di una NUOVA quest
+  // Apertura pagina di creazione nuova quest
   // -----------------------------------------
-  Future<void> _showCreateQuestDialog(BuildContext context, {bool? isDaily}) async {
-    final titleController = TextEditingController();
-    final xpController = TextEditingController();
-    final notesController = TextEditingController();
-    bool repeatedWeekly = false;
-    bool userIsDaily = isDaily ?? false;
-
-    final xpPresets = {
-      'Facile': 10,
-      'Media': 25,
-      'Difficile': 50,
-      'Molto Difficile': 100,
-    };
-    String selectedXpPreset = 'Personalizzato';
-
-    List<bool> selectedWeekDays = List.filled(7, false);
-    final weekDayLabels = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
-    DateTime? repeatUntil;
-
-    DateTime? selectedDeadline;
-    DateTimeRange? selectedDateRange;
-
-    // AlertDialog
-    return showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx2, setState) {
-            return AlertDialog(
-              title: const Text('Crea Nuova Quest'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ChoiceChip(
-                          label: const Text('Giornaliera'),
-                          selected: userIsDaily,
-                          onSelected: (sel) => setState(() => userIsDaily = true),
-                        ),
-                        const SizedBox(width: 12),
-                        ChoiceChip(
-                          label: const Text('Alta Priorità'),
-                          selected: !userIsDaily,
-                          onSelected: (sel) => setState(() => userIsDaily = false),
-                        ),
-                      ],
-                    ),
-                    
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(labelText: 'Titolo Quest'),
-                    ),
-                    
-                    
-                    const SizedBox(height: 16),
-
-                    Row(  // XP con preset + personalizzato
-                      children: [
-                        // Dropdown dei preset
-                        Expanded(
-                          flex: 2,
-                          child: DropdownButtonFormField<String>(
-                            value: selectedXpPreset,
-                            decoration: const InputDecoration(labelText: 'Preset XP'),
-                            items: [
-                              ...xpPresets.keys.map((k) =>
-                                DropdownMenuItem(value: k, child: Text('$k (${xpPresets[k]})'))
-                              ),
-                              const DropdownMenuItem(value: 'Personalizzato', child: Text('Personalizzato')),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                selectedXpPreset = val!;
-                                if (xpPresets.containsKey(val)) {
-                                  xpController.text = xpPresets[val]!.toString();
-                                } else {
-                                  xpController.clear();
-                                }
-                              });
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Campo per personalizzare/visualizzare XP
-                        Expanded(
-                          flex: 1,
-                          child: TextField(
-                            controller: xpController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'XP'),
-                          ),
-                        ),
-                      ],
-                    ),
-
-
-
-                    TextField(
-                      controller: notesController,
-                      decoration: const InputDecoration(labelText: 'Note'),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // **PICKER DATA / SELEZIONE GIORNI**  
-                    if (userIsDaily) ...[
-                      // Selezione giorni settimana
-                      Wrap(
-                        spacing: 4,
-                        children: List.generate(7, (i) {
-                          return FilterChip(
-                            label: Text(weekDayLabels[i]),
-                            selected: selectedWeekDays[i],
-                            onSelected: (sel) => setState(() => selectedWeekDays[i] = sel),
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 8),
-                      // Data fine ripetizione
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Ripeti fino a'),
-                          TextButton(
-                            onPressed: () async {
-                              final picked = await showDatePicker(
-                                context: ctx2,
-                                initialDate: repeatUntil ?? DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) setState(() => repeatUntil = picked);
-                            },
-                            child: Text(
-                              repeatUntil == null
-                                ? 'Scegli data'
-                                : DateFormat('dd/MM/yyyy').format(repeatUntil!),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ] else ...[
-                      // Non-daily: picker singola data
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Scadenza'),
-                          TextButton(
-                            onPressed: () async {
-                              final picked = await showDatePicker(
-                                context: ctx2,
-                                initialDate: selectedDeadline ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) setState(() => selectedDeadline = picked);
-                            },
-                            child: Text(
-                              selectedDeadline == null
-                                ? 'Scegli data'
-                                : DateFormat('dd/MM/yyyy').format(selectedDeadline!),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-
-                    
-
-
-
-
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('ANNULLA'),
-                  onPressed: () => Navigator.of(ctx).pop(),
-                ),
-                ElevatedButton(
-                  child: const Text('CREA'),
-                  onPressed: () async {
-                    final newTitle = titleController.text.trim();
-                    final newXp = int.tryParse(xpController.text.trim()) ?? 0;
-                    final newNotes = notesController.text.trim();
-
-                    if (newTitle.isEmpty) return;
-
-                    if (userIsDaily) {
-                      // 1) parto da oggi a mezzanotte
-                      final now = DateTime.now();
-                      final startDate = DateTime(now.year, now.month, now.day);
-
-                      // 2) arrivo a repeatUntil (o a oggi se non impostato)
-                      final endDate = repeatUntil != null
-                          ? DateTime(repeatUntil!.year, repeatUntil!.month, repeatUntil!.day)
-                          : startDate;
-
-                      // 3) genero solo se ho selezionato almeno un giorno
-                      if (selectedWeekDays.any((sel) => sel)) {
-                        for (var d = startDate; !d.isAfter(endDate); d = d.add(const Duration(days: 1))) {
-                          final idx = d.weekday - 1; // Lun=1→0 … Dom=7→6
-                          if (selectedWeekDays[idx]) {
-                            final q = QuestData(
-                              title: newTitle,
-                              deadline: d,
-                              isDaily: true,
-                              xp: newXp,
-                              notes: newNotes,
-                              repeatedWeekly: true,
-                            );
-                            await QuestService().addQuest(q);
-                          }
-                        }
-                      }
-                    } else {
-                      // non-daily: singola quest con la data scelta (o oggi)
-                      final d = selectedDeadline != null
-                          ? DateTime(selectedDeadline!.year, selectedDeadline!.month, selectedDeadline!.day)
-                          : DateTime.now();
-                      final q = QuestData(
-                        title: newTitle,
-                        deadline: d,
-                        isDaily: false,
-                        xp: newXp,
-                        notes: newNotes,
-                      );
-                      await QuestService().addQuest(q);
-                    }
-
-                    Navigator.of(context).pop();
-                    setState(() {});
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
+  Future<void> _openCreateQuestPage(BuildContext context, {bool? isDaily}) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NewQuestPage(defaultIsDaily: isDaily),
+      ),
     );
   }
+
+
 
 
 

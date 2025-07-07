@@ -39,6 +39,8 @@ class QuestDetailsPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text('XP: ${quest.xp}'),
             const SizedBox(height: 8),
+            Text('Fatigue: ${quest.fatigue}'),
+            const SizedBox(height: 8),
             Text('Note: ${quest.notes}'),
             const SizedBox(height: 8),
             Text('Giorn.: ${quest.isDaily ? "Sì" : "No"}'),
