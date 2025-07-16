@@ -7,6 +7,7 @@ import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 import 'package:intl/intl.dart';
 import 'package:life_leveling/services/fatigue_service.dart';
 import 'package:life_leveling/services/level_service.dart';
+import 'package:life_leveling/services/stats_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   // Dati utente
   final String userName = 'Corrado Enea Crevatin';
+  DateTime _statsDate = DateTime.now();
 
   bool _isOverdue(QuestData quest) {
     final now = DateTime.now();
@@ -77,6 +79,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 dailyFatigue: FatigueService().fatigue,
               ),
             ),
+            const SizedBox(height: 24.0),
+
+            _buildStatsCard(context),
             const SizedBox(height: 24.0),
 
             // --- Box Quest ad Alta Priorità ---
@@ -155,14 +160,62 @@ class _DashboardPageState extends State<DashboardPage> {
   }) {
     return Card(
       elevation: 4.0,
-      clipBehavior: Clip
-          .antiAlias, // consente di avere la ripple effect su tutto il card se cliccato
+      clipBehavior: Clip.antiAlias, // consente di avere la ripple effect su tutto il card se cliccato
       child: InkWell(
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: child,
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatsCard(BuildContext context) {
+    final stats = StatsService().getStats(_statsDate);
+    return _buildDashboardCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() {
+                    _statsDate = _statsDate.subtract(const Duration(days: 1));
+                  });
+                },
+              ),
+              Text(
+                DateFormat('dd/MM/yyyy').format(_statsDate),
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward),
+                onPressed: () {
+                  setState(() {
+                    _statsDate = _statsDate.add(const Duration(days: 1));
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Quest completate: ${stats.questsCompleted}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          Text(
+            'XP guadagnati: ${stats.xpGained.toInt()}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          Text(
+            'Fatica: ${stats.fatigue}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
       ),
     );
   }
