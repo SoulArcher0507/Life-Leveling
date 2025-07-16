@@ -35,6 +35,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
   Widget _statusChip(String status) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(right: 4),
       decoration: BoxDecoration(
         color: _statusColor(status),
         borderRadius: BorderRadius.circular(4),
@@ -327,6 +328,10 @@ class _ProgettiPageState extends State<ProgettiPage> {
       'Blue': Colors.blue,
       'Green': Colors.green,
       'Red': Colors.red,
+      'Orange': Colors.orange,
+      'Purple': Colors.purple,
+      'Pink': Colors.pink,
+      'Teal': Colors.teal,
     };
     await showDialog(
       context: context,
