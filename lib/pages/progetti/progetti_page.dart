@@ -35,7 +35,10 @@ class _ProgettiPageState extends State<ProgettiPage> {
     });
   }
 
-  Future<void> _openQuestDetails(BoardItem item) async {
+  Future<void> _openQuestDetails(
+    BoardItem item,
+    List<BoardItem> parentList,
+  ) async {
     if (item.quest == null) return;
     final deleted = await Navigator.push(
       context,
@@ -43,7 +46,11 @@ class _ProgettiPageState extends State<ProgettiPage> {
         builder: (_) => QuestDetailsPage(quest: item.quest!),
       ),
     );
-    if (deleted == true) setState(() {});
+    if (deleted == true) {
+      setState(() {
+        parentList.remove(item);
+      });
+    }
   }
 
   Widget _statusChip(String status) {
@@ -190,6 +197,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               return SizedBox(
                 width: tableWidth,
                 child: DataTable(
+                  showCheckboxColumn: false,
                   columnSpacing: 0,
                   columns: [
                     const DataColumn(
@@ -207,7 +215,11 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   ],
                   rows: [
                 for (final item in group.items)
-                  ..._buildItemRows(item, valueWidth: valueWidth),
+                  ..._buildItemRows(
+                    item,
+                    parentList: group.items,
+                    valueWidth: valueWidth,
+                  ),
               ],
                 ),
               );
@@ -218,8 +230,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
     );
   }
 
-  List<DataRow> _buildItemRows(BoardItem item,
-      {int indent = 0, required double valueWidth}) {
+  List<DataRow> _buildItemRows(
+    BoardItem item, {
+    required List<BoardItem> parentList,
+    int indent = 0,
+    required double valueWidth,
+  }) {
     final firstCell = Padding(
       padding: EdgeInsets.only(left: indent * 16.0),
       child: Row(
@@ -236,7 +252,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
       ),
     );
 
-    final cells = <DataCell>[DataCell(SizedBox(width: kItemColumnWidth, child: firstCell), onTap: () => _openQuestDetails(item))];
+    final cells = <DataCell>[
+      DataCell(
+        SizedBox(width: kItemColumnWidth, child: firstCell),
+        onTap: () => _openQuestDetails(item, parentList),
+      )
+    ];
     for (int i = 0; i < item.values.length; i++) {
       final value = item.values[i];
       if (i == 0) {
@@ -274,12 +295,18 @@ class _ProgettiPageState extends State<ProgettiPage> {
         (states) => _statusColor(item.values.first).withOpacity(0.2),
       ),
       cells: cells,
-      onSelectChanged: (_) => _openQuestDetails(item),
     );
 
     final rows = <DataRow>[row];
     for (final sub in item.subItems) {
-      rows.addAll(_buildItemRows(sub, indent: indent + 1, valueWidth: valueWidth));
+      rows.addAll(
+        _buildItemRows(
+          sub,
+          parentList: item.subItems,
+          indent: indent + 1,
+          valueWidth: valueWidth,
+        ),
+      );
     }
     return rows;
   }
@@ -649,6 +676,18 @@ class _ProgettiPageState extends State<ProgettiPage> {
   }
 
   List<Workspace> _createSampleData() {
+    final service = QuestService();
+    void maybeAddQuest(QuestData q) {
+      final exists = service.allQuests.any(
+        (quest) =>
+            quest.title == q.title &&
+            quest.deadline == q.deadline &&
+            quest.isDaily == q.isDaily,
+      );
+      if (!exists) {
+        service.addQuest(q);
+      }
+    }
     final board = Board(
       name: 'Example Board',
       columns: ['Status', 'Due'],
@@ -666,7 +705,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 notes: '',
                 fatigue: 5,
               );
-              QuestService().addQuest(q);
+              maybeAddQuest(q);
               return BoardItem(
                 title: 'Task 1',
                 xp: 10,
@@ -683,7 +722,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                       notes: '',
                       fatigue: 3,
                     );
-                    QuestService().addQuest(sq);
+                    maybeAddQuest(sq);
                     return BoardItem(
                       title: 'Subtask 1',
                       xp: 5,
@@ -704,7 +743,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 notes: '',
                 fatigue: 7,
               );
-              QuestService().addQuest(q);
+              maybeAddQuest(q);
               return BoardItem(
                 title: 'Task 2',
                 xp: 15,
@@ -728,7 +767,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 notes: '',
                 fatigue: 10,
               );
-              QuestService().addQuest(q);
+              maybeAddQuest(q);
               return BoardItem(
                 title: 'Task 3',
                 xp: 20,
