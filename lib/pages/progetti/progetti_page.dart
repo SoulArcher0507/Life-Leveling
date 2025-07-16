@@ -3,6 +3,7 @@ import 'package:life_leveling/models/project_models.dart';
 import 'package:intl/intl.dart';
 
 const List<String> kTaskStatusOptions = [
+  '',
   'Done',
   'Working on it',
   'Stuck',
@@ -412,6 +413,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
 
   Color _statusColor(String status) {
     switch (status) {
+      case '':
+        return Colors.grey;
       case 'Stuck':
         return Colors.red;
       case 'Done':
