@@ -14,8 +14,6 @@ class QuestsPage extends StatefulWidget {
 }
 
 class _QuestsPageState extends State<QuestsPage> {
-  // 7 giorni in italiano
-  final List<String> _daysOfWeek = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 
   late DateTime _mondayOfCurrentWeek;
   int _selectedDayIndex = 0;
@@ -137,54 +135,7 @@ class _QuestsPageState extends State<QuestsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    setState(() {
-                      _mondayOfCurrentWeek = _mondayOfCurrentWeek.subtract(const Duration(days: 7));  
-                      _selectedDayIndex = 0;                                                           
-                    });
-                  },
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: _mondayOfCurrentWeek,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        // ricavo il Lunedì della settimana scelta
-                        _mondayOfCurrentWeek = picked.subtract(Duration(days: picked.weekday - 1));  
-                        _selectedDayIndex = 0;                                                         
-                      });
-                    }
-                  },
-                  child: Text(
-                    DateFormat('MMMM yyyy').format(_mondayOfCurrentWeek),                        
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: () {
-                    setState(() {
-                      _mondayOfCurrentWeek = _mondayOfCurrentWeek.add(const Duration(days: 7));    
-                      _selectedDayIndex = 0;                                                         
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          _buildDayNavigationRow(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: _buildDayNavigationRow(),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -223,9 +174,7 @@ class _QuestsPageState extends State<QuestsPage> {
   Widget _buildDayNavigationRow() {
     final selectedDate =
         _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex));
-    final dayName = _daysOfWeek[_selectedDayIndex];
-    final formattedDate =
-        '$dayName ${DateFormat('dd/MM/yyyy').format(selectedDate)}';
+    final formattedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -238,9 +187,26 @@ class _QuestsPageState extends State<QuestsPage> {
             });
           },
         ),
-        Text(
-          formattedDate,
-          style: Theme.of(context).textTheme.bodyLarge,
+        TextButton(
+          onPressed: () async {
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: selectedDate,
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+            );
+            if (picked != null) {
+              setState(() {
+                _mondayOfCurrentWeek =
+                    picked.subtract(Duration(days: picked.weekday - 1));
+                _selectedDayIndex = picked.weekday - 1;
+              });
+            }
+          },
+          child: Text(
+            formattedDate,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
         ),
         IconButton(
           icon: const Icon(Icons.arrow_forward),
