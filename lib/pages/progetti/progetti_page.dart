@@ -9,6 +9,10 @@ const List<String> kTaskStatusOptions = [
   'Stuck',
 ];
 
+const double kItemColumnWidth = 200;
+const double kValueColumnWidth = 120;
+const double kActionsColumnWidth = 60;
+
 class ProgettiPage extends StatefulWidget {
   const ProgettiPage({Key? key}) : super(key: key);
 
@@ -158,15 +162,30 @@ class _ProgettiPageState extends State<ProgettiPage> {
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: [
-              const DataColumn(label: Text('Item')),
-              ...board.columns.map((c) => DataColumn(label: Text(c))),
-              const DataColumn(label: Text('')),
-            ],
-            rows: [
-              for (final item in group.items) ..._buildItemRows(item),
-            ],
+          child: SizedBox(
+            width: kItemColumnWidth +
+                board.columns.length * kValueColumnWidth +
+                kActionsColumnWidth,
+            child: DataTable(
+              columnSpacing: 0,
+              columns: [
+                const DataColumn(
+                    label: SizedBox(
+                  width: kItemColumnWidth,
+                  child: Text('Item'),
+                )),
+                ...board.columns.map((c) => DataColumn(
+                        label: SizedBox(
+                      width: kValueColumnWidth,
+                      child: Text(c),
+                    ))),
+                const DataColumn(
+                    label: SizedBox(width: kActionsColumnWidth, child: Text(''))),
+              ],
+              rows: [
+                for (final item in group.items) ..._buildItemRows(item),
+              ],
+            ),
           ),
         ),
       ],
@@ -176,33 +195,49 @@ class _ProgettiPageState extends State<ProgettiPage> {
   List<DataRow> _buildItemRows(BoardItem item, {int indent = 0}) {
     final firstCell = Padding(
       padding: EdgeInsets.only(left: indent * 16.0),
-      child: Text(item.title,
-          style: indent > 0 ? TextStyle(color: Colors.grey[600]) : null),
+      child: Row(
+        children: [
+          if (indent > 0)
+            const Icon(Icons.subdirectory_arrow_right,
+                size: 16, color: Colors.grey),
+          if (indent > 0) const SizedBox(width: 4),
+          Text(
+            item.title,
+            style: indent > 0 ? TextStyle(color: Colors.grey[600]) : null,
+          ),
+        ],
+      ),
     );
 
-    final cells = <DataCell>[DataCell(firstCell)];
+    final cells = <DataCell>[DataCell(SizedBox(width: kItemColumnWidth, child: firstCell))];
     for (int i = 0; i < item.values.length; i++) {
       final value = item.values[i];
       if (i == 0) {
         cells.add(
           DataCell(
-            InkWell(
-              onTap: () => _toggleTaskStatus(item),
-              child: _statusChip(value),
+            SizedBox(
+              width: kValueColumnWidth,
+              child: InkWell(
+                onTap: () => _toggleTaskStatus(item),
+                child: _statusChip(value),
+              ),
             ),
           ),
         );
       } else {
-        cells.add(DataCell(Text(value)));
+        cells.add(DataCell(SizedBox(width: kValueColumnWidth, child: Text(value))));
       }
     }
 
     cells.add(
       DataCell(
-        IconButton(
-          icon: const Icon(Icons.add),
-          tooltip: 'Add Subtask',
-          onPressed: () => _showAddSubtaskDialog(item),
+        SizedBox(
+          width: kActionsColumnWidth,
+          child: IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Add Subtask',
+            onPressed: () => _showAddSubtaskDialog(item),
+          ),
         ),
       ),
     );
