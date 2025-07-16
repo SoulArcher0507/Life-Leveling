@@ -3,11 +3,19 @@ import 'package:life_leveling/widgets/custom_bottom_navigation_bar.dart';
 import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
 
 import 'package:life_leveling/pages/quests/quests_page.dart';
+import 'package:life_leveling/pages/settings/settings_page.dart';
 // import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
 // import 'package:tuo_progetto/pages/grafici/grafici_page.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  final ThemeMode currentThemeMode;
+  final ValueChanged<ThemeMode> onThemeChanged;
+
+  const MyHomePage({
+    Key? key,
+    required this.currentThemeMode,
+    required this.onThemeChanged,
+  }) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -49,13 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Se hai definito la SettingsPage come route, naviga così:
-              // Navigator.pushNamed(context, '/settings');
-              // Altrimenti, naviga a un widget inline:
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const SettingsPage()),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SettingsPage(
+                    currentThemeMode: widget.currentThemeMode,
+                    onThemeChanged: widget.onThemeChanged,
+                  ),
+                ),
+              );
             },
           ),
         ],

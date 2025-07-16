@@ -1,40 +1,50 @@
 import 'package:flutter/material.dart';
-// import 'package:tuo_progetto/theme/solo_leveling_theme.dart';
-// import 'package:life_leveling/routes/app_routes.dart';
-// import 'package:tuo_progetto/pages/settings/settings_page.dart';
 import 'package:life_leveling/pages/home/home_page.dart';
 import 'package:life_leveling/services/quest_service.dart';
-
-
+import 'package:life_leveling/services/theme_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await QuestService().init();
+  final themeMode = await ThemeService().getThemeMode();
 
-  runApp(const MyApp());
+  runApp(MyApp(initialThemeMode: themeMode));
 }
 
+class MyApp extends StatefulWidget {
+  final ThemeMode initialThemeMode;
+  const MyApp({super.key, required this.initialThemeMode});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  late ThemeMode _themeMode;
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _themeMode = widget.initialThemeMode;
+  }
+
+  void _updateTheme(ThemeMode mode) {
+    setState(() => _themeMode = mode);
+    ThemeService().saveThemeMode(mode);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Rimuove il banner "debug" nell'angolo
       debugShowCheckedModeBanner: false,
-
-
-      // theme: SoloLevelingTheme.lightTheme,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: _themeMode,
+      home: MyHomePage(
+        currentThemeMode: _themeMode,
+        onThemeChanged: _updateTheme,
       ),
-
-      home: const MyHomePage(),
-
     );
   }
 }
