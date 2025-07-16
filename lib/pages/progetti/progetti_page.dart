@@ -162,6 +162,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
             columns: [
               const DataColumn(label: Text('Item')),
               ...board.columns.map((c) => DataColumn(label: Text(c))),
+              const DataColumn(label: Text('')),
             ],
             rows: [
               for (final item in group.items) ..._buildItemRows(item),
@@ -196,7 +197,22 @@ class _ProgettiPageState extends State<ProgettiPage> {
       }
     }
 
-    final row = DataRow(cells: cells);
+    cells.add(
+      DataCell(
+        IconButton(
+          icon: const Icon(Icons.add),
+          tooltip: 'Add Subtask',
+          onPressed: () => _showAddSubtaskDialog(item),
+        ),
+      ),
+    );
+
+    final row = DataRow(
+      color: MaterialStateProperty.resolveWith(
+        (states) => _statusColor(item.values.first).withOpacity(0.2),
+      ),
+      cells: cells,
+    );
 
     final rows = <DataRow>[row];
     for (final sub in item.subItems) {
@@ -400,6 +416,81 @@ class _ProgettiPageState extends State<ProgettiPage> {
                     title: titleController.text,
                     values: [selectedStatus, dueController.text],
                   ));
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddSubtaskDialog(BoardItem parent) async {
+    final titleController = TextEditingController();
+    String selectedStatus = kTaskStatusOptions.first;
+    final dueController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setModalState) => AlertDialog(
+          title: const Text('New Subtask'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              DropdownButtonFormField<String>(
+                value: selectedStatus,
+                onChanged: (val) {
+                  if (val != null) setModalState(() => selectedStatus = val);
+                },
+                items: [
+                  for (final status in kTaskStatusOptions)
+                    DropdownMenuItem(
+                      value: status,
+                      child: _statusChip(status),
+                    ),
+                ],
+                decoration: const InputDecoration(labelText: 'Status'),
+              ),
+              TextField(
+                controller: dueController,
+                readOnly: true,
+                decoration: const InputDecoration(labelText: 'Due'),
+                onTap: () async {
+                  final now = DateTime.now();
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: now,
+                    firstDate: DateTime(now.year - 5),
+                    lastDate: DateTime(now.year + 5),
+                  );
+                  if (picked != null) {
+                    dueController.text =
+                        DateFormat('yyyy-MM-dd').format(picked);
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  parent.subItems.add(
+                    BoardItem(
+                      title: titleController.text,
+                      values: [selectedStatus, dueController.text],
+                    ),
+                  );
                 });
                 Navigator.pop(context);
               },
