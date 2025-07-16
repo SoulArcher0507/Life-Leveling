@@ -630,7 +630,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
           name: 'To Do',
           color: Colors.blue,
           items: [
-<<<<<<< HEAD
             () {
               final q = QuestData(
                 title: 'Task 1',
@@ -687,29 +686,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 quest: q,
               );
             }(),
-=======
-            BoardItem(
-              title: 'Task 1',
-              values: ['Working on it', '2023-12-01'],
-              subItems: [
-                BoardItem(
-                  title: 'Subtask 1',
-                  values: ['Done', ''],
-                ),
-              ],
-            ),
-            BoardItem(
-              title: 'Task 2',
-              values: ['Stuck', '2023-11-15'],
-            ),
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
           ],
         ),
         BoardGroup(
           name: 'Done',
           color: Colors.green,
           items: [
-<<<<<<< HEAD
             () {
               final q = QuestData(
                 title: 'Task 3',
@@ -728,12 +710,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 quest: q,
               );
             }(),
-=======
-            BoardItem(
-              title: 'Task 3',
-              values: ['Done', '2023-10-01'],
-            ),
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
           ],
         ),
       ],
