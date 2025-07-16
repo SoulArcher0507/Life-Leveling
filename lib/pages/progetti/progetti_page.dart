@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
 import 'package:intl/intl.dart';
+import 'package:life_leveling/models/quest_model.dart';
+import 'package:life_leveling/services/quest_service.dart';
 
 const List<String> kTaskStatusOptions = [
   '',
@@ -399,6 +401,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
     final titleController = TextEditingController();
     String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
+    final xpController = TextEditingController();
+    int fatigue = 0;
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -442,6 +446,21 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   }
                 },
               ),
+              TextField(
+                controller: xpController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'XP'),
+              ),
+              const SizedBox(height: 8),
+              Text('Fatigue: $fatigue'),
+              Slider(
+                value: fatigue.toDouble(),
+                min: 0,
+                max: 100,
+                divisions: 100,
+                label: '$fatigue',
+                onChanged: (v) => setModalState(() => fatigue = v.round()),
+              ),
             ],
           ),
           actions: [
@@ -450,13 +469,28 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                final xp = int.tryParse(xpController.text) ?? 0;
                 setState(() {
                   group.items.add(BoardItem(
                     title: titleController.text,
+                    xp: xp,
+                    fatigue: fatigue,
                     values: [selectedStatus, dueController.text],
                   ));
                 });
+                await QuestService().addQuest(
+                  QuestData(
+                    title: titleController.text,
+                    deadline: dueController.text.isNotEmpty
+                        ? DateTime.parse(dueController.text)
+                        : DateTime.now(),
+                    isDaily: false,
+                    xp: xp,
+                    notes: '',
+                    fatigue: fatigue,
+                  ),
+                );
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -471,6 +505,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
     final titleController = TextEditingController();
     String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
+    final xpController = TextEditingController();
+    int fatigue = 0;
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -515,6 +551,21 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   }
                 },
               ),
+              TextField(
+                controller: xpController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'XP'),
+              ),
+              const SizedBox(height: 8),
+              Text('Fatigue: $fatigue'),
+              Slider(
+                value: fatigue.toDouble(),
+                min: 0,
+                max: 100,
+                divisions: 100,
+                label: '$fatigue',
+                onChanged: (v) => setModalState(() => fatigue = v.round()),
+              ),
             ],
           ),
           actions: [
@@ -523,15 +574,30 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                final xp = int.tryParse(xpController.text) ?? 0;
                 setState(() {
                   parent.subItems.add(
                     BoardItem(
                       title: titleController.text,
+                      xp: xp,
+                      fatigue: fatigue,
                       values: [selectedStatus, dueController.text],
                     ),
                   );
                 });
+                await QuestService().addQuest(
+                  QuestData(
+                    title: titleController.text,
+                    deadline: dueController.text.isNotEmpty
+                        ? DateTime.parse(dueController.text)
+                        : DateTime.now(),
+                    isDaily: false,
+                    xp: xp,
+                    notes: '',
+                    fatigue: fatigue,
+                  ),
+                );
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -568,16 +634,22 @@ class _ProgettiPageState extends State<ProgettiPage> {
           items: [
             BoardItem(
               title: 'Task 1',
+              xp: 10,
+              fatigue: 5,
               values: ['Working on it', '2023-12-01'],
               subItems: [
                 BoardItem(
                   title: 'Subtask 1',
+                  xp: 5,
+                  fatigue: 3,
                   values: ['Done', ''],
                 ),
               ],
             ),
             BoardItem(
               title: 'Task 2',
+              xp: 15,
+              fatigue: 7,
               values: ['Stuck', '2023-11-15'],
             ),
           ],
@@ -588,6 +660,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
           items: [
             BoardItem(
               title: 'Task 3',
+              xp: 20,
+              fatigue: 10,
               values: ['Done', '2023-10-01'],
             ),
           ],
