@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
+import 'package:intl/intl.dart';
 
 const List<String> kTaskStatusOptions = [
   'Done',
@@ -252,7 +253,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+        builder: (context, setModalState) => AlertDialog(
           title: const Text('New Group'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -265,7 +266,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               DropdownButton<Color>(
                 value: selectedColor,
                 onChanged: (color) {
-                  if (color != null) setState(() => selectedColor = color);
+                  if (color != null) setModalState(() => selectedColor = color);
                 },
                 items: [
                   for (final entry in colorOptions.entries)
@@ -318,7 +319,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+        builder: (context, setModalState) => AlertDialog(
           title: const Text('New Task'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -330,7 +331,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               DropdownButtonFormField<String>(
                 value: selectedStatus,
                 onChanged: (val) {
-                  if (val != null) setState(() => selectedStatus = val);
+                  if (val != null) setModalState(() => selectedStatus = val);
                 },
                 items: [
                   for (final status in kTaskStatusOptions)
@@ -344,7 +345,20 @@ class _ProgettiPageState extends State<ProgettiPage> {
               ),
               TextField(
                 controller: dueController,
+                readOnly: true,
                 decoration: const InputDecoration(labelText: 'Due'),
+                onTap: () async {
+                  final now = DateTime.now();
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: now,
+                    firstDate: DateTime(now.year - 5),
+                    lastDate: DateTime(now.year + 5),
+                  );
+                  if (picked != null) {
+                    dueController.text = DateFormat('yyyy-MM-dd').format(picked);
+                  }
+                },
               ),
             ],
           ),
