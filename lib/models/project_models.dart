@@ -7,9 +7,10 @@ class Workspace {
 
   Workspace({
     required this.name,
-    this.folders = const [],
-    this.boards = const [],
-  });
+    List<WorkspaceFolder>? folders,
+    List<Board>? boards,
+  })  : folders = List<WorkspaceFolder>.from(folders ?? <WorkspaceFolder>[]),
+        boards = List<Board>.from(boards ?? <Board>[]);
 }
 
 class WorkspaceFolder {
@@ -19,9 +20,11 @@ class WorkspaceFolder {
 
   WorkspaceFolder({
     required this.name,
-    this.subFolders = const [],
-    this.boards = const [],
-  });
+    List<WorkspaceFolder>? subFolders,
+    List<Board>? boards,
+  })  : subFolders =
+            List<WorkspaceFolder>.from(subFolders ?? <WorkspaceFolder>[]),
+        boards = List<Board>.from(boards ?? <Board>[]);
 }
 
 class Board {
@@ -31,9 +34,10 @@ class Board {
 
   Board({
     required this.name,
-    this.columns = const [],
-    this.groups = const [],
-  });
+    List<String>? columns,
+    List<BoardGroup>? groups,
+  })  : columns = List<String>.from(columns ?? <String>[]),
+        groups = List<BoardGroup>.from(groups ?? <BoardGroup>[]);
 }
 
 class BoardGroup {
@@ -44,8 +48,8 @@ class BoardGroup {
   BoardGroup({
     required this.name,
     required this.color,
-    this.items = const [],
-  });
+    List<BoardItem>? items,
+  }) : items = List<BoardItem>.from(items ?? <BoardItem>[]);
 }
 
 class BoardItem {
@@ -55,7 +59,8 @@ class BoardItem {
 
   BoardItem({
     required this.title,
-    this.values = const [],
-    this.subItems = const [],
-  });
+    List<String>? values,
+    List<BoardItem>? subItems,
+  })  : values = List<String>.from(values ?? <String>[]),
+        subItems = List<BoardItem>.from(subItems ?? <BoardItem>[]);
 }
