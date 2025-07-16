@@ -401,6 +401,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
     final titleController = TextEditingController();
     String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
+    final xpController = TextEditingController();
+    int fatigue = 0;
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -571,6 +573,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
+            TextButton(
               onPressed: () async {
                 final xp = int.tryParse(xpController.text) ?? 0;
                 setState(() {
