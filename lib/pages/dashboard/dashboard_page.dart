@@ -5,6 +5,7 @@ import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/pages/dashboard/livello_dettagli_page.dart';
 import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 import 'package:intl/intl.dart';
+import 'package:life_leveling/services/fatigue_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -70,6 +71,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 requiredXP: requiredXP,
                 userClass: userClass,
                 userAbilities: userAbilities,
+                dailyFatigue: FatigueService().fatigue,
               ),
             ),
             const SizedBox(height: 24.0),
@@ -171,6 +173,7 @@ class _DashboardPageState extends State<DashboardPage> {
     required double requiredXP,
     required String userClass,
     required String userAbilities,
+    required int dailyFatigue,
   }) {
     final double xpPercentage = (currentXP / requiredXP).clamp(0.0, 1.0);
 
@@ -187,6 +190,7 @@ class _DashboardPageState extends State<DashboardPage> {
               requiredXP: requiredXP,
               userClass: userClass,
               userAbilities: userAbilities,
+              dailyFatigue: dailyFatigue,
             ),
           ),
         );
@@ -238,6 +242,17 @@ class _DashboardPageState extends State<DashboardPage> {
           Text(
             'Abilità: $userAbilities',
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            'Fatica odierna: $dailyFatigue/100',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: dailyFatigue > 100
+                      ? Colors.red
+                      : dailyFatigue > 50
+                          ? Colors.orange
+                          : Colors.black,
+                ),
           ),
         ],
       ),
