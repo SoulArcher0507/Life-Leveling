@@ -158,12 +158,17 @@ class _ProgettiPageState extends State<ProgettiPage> {
           style: indent > 0 ? TextStyle(color: Colors.grey[600]) : null),
     );
 
-    final row = DataRow(
-      cells: [
-        DataCell(firstCell),
-        ...item.values.map((v) => DataCell(Text(v))),
-      ],
-    );
+    final cells = <DataCell>[DataCell(firstCell)];
+    for (int i = 0; i < item.values.length; i++) {
+      final value = item.values[i];
+      TextStyle? style;
+      if (i == 0) {
+        style = TextStyle(color: _statusColor(value));
+      }
+      cells.add(DataCell(Text(value, style: style)));
+    }
+
+    final row = DataRow(cells: cells);
 
     final rows = <DataRow>[row];
     for (final sub in item.subItems) {
@@ -204,75 +209,33 @@ class _ProgettiPageState extends State<ProgettiPage> {
 
   Future<void> _showAddBoardDialog(Workspace workspace) async {
     final nameController = TextEditingController();
-    final columnControllers = <TextEditingController>[
-      TextEditingController(text: 'Status'),
-      TextEditingController(text: 'Due'),
-    ];
     await showDialog(
       context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('New Board'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Board name'),
-                ),
-                const SizedBox(height: 8),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Columns'),
-                ),
-                ...[
-                  for (final controller in columnControllers)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: TextField(
-                        controller: controller,
-                        decoration:
-                            const InputDecoration(labelText: 'Column name'),
-                      ),
-                    ),
-                ],
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      columnControllers.add(TextEditingController());
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Column'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final columns = columnControllers
-                    .map((c) => c.text)
-                    .where((t) => t.trim().isNotEmpty)
-                    .toList();
-                setState(() {
-                  workspace.boards.add(Board(
-                    name: nameController.text,
-                    columns: columns.isEmpty ? ['Status', 'Due'] : columns,
-                    groups: [],
-                  ));
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Add'),
-            ),
-          ],
+      builder: (_) => AlertDialog(
+        title: const Text('New Board'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(labelText: 'Board name'),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                workspace.boards.add(Board(
+                  name: nameController.text,
+                  columns: const ['Status', 'Due'],
+                  groups: [],
+                ));
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }
@@ -371,7 +334,11 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 },
                 items: [
                   for (final status in kTaskStatusOptions)
-                    DropdownMenuItem(value: status, child: Text(status)),
+                    DropdownMenuItem(
+                      value: status,
+                      child: Text(status,
+                          style: TextStyle(color: _statusColor(status))),
+                    ),
                 ],
                 decoration: const InputDecoration(labelText: 'Status'),
               ),
@@ -402,6 +369,19 @@ class _ProgettiPageState extends State<ProgettiPage> {
         ),
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Stuck':
+        return Colors.red;
+      case 'Done':
+        return Colors.green;
+      case 'Working on it':
+        return Colors.orange;
+      default:
+        return Colors.black;
+    }
   }
 
   List<Workspace> _createSampleData() {
