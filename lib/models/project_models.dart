@@ -54,11 +54,15 @@ class BoardGroup {
 
 class BoardItem {
   final String title;
+  final int xp;
+  final int fatigue;
   final List<String> values;
   final List<BoardItem> subItems;
 
   BoardItem({
     required this.title,
+    this.xp = 0,
+    this.fatigue = 0,
     List<String>? values,
     List<BoardItem>? subItems,
   })  : values = List<String>.from(values ?? <String>[]),
