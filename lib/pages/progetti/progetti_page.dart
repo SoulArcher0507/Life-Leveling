@@ -43,6 +43,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
             children: [
               for (final board in workspace.boards) _buildBoard(board),
               for (final folder in workspace.folders) _buildFolder(folder),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => _showAddBoardDialog(workspace),
+                icon: const Icon(Icons.add),
+                label: const Text('Add Board'),
+              ),
             ],
           ),
         ),
@@ -67,15 +73,25 @@ class _ProgettiPageState extends State<ProgettiPage> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
-        title: Text(board.name),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(board.name),
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Group',
+              onPressed: () => _showAddGroupDialog(board),
+            ),
+          ],
+        ),
         children: [
-          for (final group in board.groups) _buildGroup(group, board.columns),
+          for (final group in board.groups) _buildGroup(board, group),
         ],
       ),
     );
   }
 
-  Widget _buildGroup(BoardGroup group, List<String> columns) {
+  Widget _buildGroup(Board board, BoardGroup group) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -83,9 +99,19 @@ class _ProgettiPageState extends State<ProgettiPage> {
           width: double.infinity,
           color: group.color,
           padding: const EdgeInsets.all(8),
-          child: Text(
-            group.name,
-            style: const TextStyle(color: Colors.white),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                group.name,
+                style: const TextStyle(color: Colors.white),
+              ),
+              IconButton(
+                onPressed: () => _showAddTaskDialog(board, group),
+                icon: const Icon(Icons.add, color: Colors.white),
+                tooltip: 'Add Task',
+              )
+            ],
           ),
         ),
         SingleChildScrollView(
@@ -93,7 +119,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           child: DataTable(
             columns: [
               const DataColumn(label: Text('Item')),
-              ...columns.map((c) => DataColumn(label: Text(c))),
+              ...board.columns.map((c) => DataColumn(label: Text(c))),
             ],
             rows: [
               for (final item in group.items) ..._buildItemRows(item),
@@ -125,10 +151,123 @@ class _ProgettiPageState extends State<ProgettiPage> {
     return rows;
   }
 
+  Future<void> _showAddBoardDialog(Workspace workspace) async {
+    final controller = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('New Board'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Board name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                workspace.boards.add(Board(
+                  name: controller.text,
+                  columns: ['Status', 'Due'],
+                  groups: [],
+                ));
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAddGroupDialog(Board board) async {
+    final controller = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('New Group'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Group name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                board.groups.add(BoardGroup(
+                  name: controller.text,
+                  color: Colors.grey,
+                  items: [],
+                ));
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAddTaskDialog(Board board, BoardGroup group) async {
+    final titleController = TextEditingController();
+    final statusController = TextEditingController();
+    final dueController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('New Task'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            TextField(
+              controller: statusController,
+              decoration: const InputDecoration(labelText: 'Status'),
+            ),
+            TextField(
+              controller: dueController,
+              decoration: const InputDecoration(labelText: 'Due'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                group.items.add(BoardItem(
+                  title: titleController.text,
+                  values: [statusController.text, dueController.text],
+                ));
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<Workspace> _createSampleData() {
     final board = Board(
       name: 'Example Board',
-      columns: ['Status', 'Owner', 'Due'],
+      columns: ['Status', 'Due'],
       groups: [
         BoardGroup(
           name: 'To Do',
@@ -136,17 +275,17 @@ class _ProgettiPageState extends State<ProgettiPage> {
           items: [
             BoardItem(
               title: 'Task 1',
-              values: ['Working on it', 'Alice', '2023-12-01'],
+              values: ['Working on it', '2023-12-01'],
               subItems: [
                 BoardItem(
                   title: 'Subtask 1',
-                  values: ['Done', 'Bob', ''],
+                  values: ['Done', ''],
                 ),
               ],
             ),
             BoardItem(
               title: 'Task 2',
-              values: ['Stuck', 'Bob', '2023-11-15'],
+              values: ['Stuck', '2023-11-15'],
             ),
           ],
         ),
@@ -156,7 +295,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           items: [
             BoardItem(
               title: 'Task 3',
-              values: ['Done', 'Charlie', '2023-10-01'],
+              values: ['Done', '2023-10-01'],
             ),
           ],
         ),
@@ -165,7 +304,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
 
     return [
       Workspace(name: 'Main Workspace', boards: [board]),
-      Workspace(name: 'Marketing'),
     ];
   }
 }
