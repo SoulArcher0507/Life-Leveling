@@ -55,21 +55,17 @@ class BoardGroup {
 
 class BoardItem {
   final String title;
+  final int xp;
+  final int fatigue;
   final List<String> values;
   final List<BoardItem> subItems;
   final QuestData? quest;
 
   BoardItem({
     required this.title,
-<<<<<<< HEAD
-<<<<<<< HEAD
     this.xp = 0,
     this.fatigue = 0,
     this.quest,
-=======
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
-=======
->>>>>>> parent of d341a7a (Fix task dialog fields)
     List<String>? values,
     List<BoardItem>? subItems,
   })  : values = List<String>.from(values ?? <String>[]),
