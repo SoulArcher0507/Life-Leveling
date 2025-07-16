@@ -12,6 +12,7 @@ class LivelloDettagliPage extends StatelessWidget {
   final double requiredXP;
   final String userClass;
   final String userAbilities;
+  final int dailyFatigue;
 
   const LivelloDettagliPage({
     Key? key,
@@ -21,6 +22,7 @@ class LivelloDettagliPage extends StatelessWidget {
     required this.requiredXP,
     required this.userClass,
     required this.userAbilities,
+    required this.dailyFatigue,
   }) : super(key: key);
 
   @override
@@ -68,6 +70,17 @@ class LivelloDettagliPage extends StatelessWidget {
             Text(
               'Abilità: $userAbilities',
               style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              'Fatica odierna: $dailyFatigue/100',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: dailyFatigue > 100
+                        ? Colors.red
+                        : dailyFatigue > 50
+                            ? Colors.orange
+                            : Colors.black,
+                  ),
             ),
 
             // Spazio per ulteriori dettagli

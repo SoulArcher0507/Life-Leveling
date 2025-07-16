@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
+import 'package:life_leveling/services/fatigue_service.dart';
 import 'package:intl/intl.dart';
 
 class QuestDetailsPage extends StatelessWidget {
@@ -13,6 +14,14 @@ class QuestDetailsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(quest.title),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: () async {
+              await FatigueService().addFatigue(quest.fatigue);
+              await QuestService().removeQuest(quest);
+              Navigator.of(context).pop(true);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {
