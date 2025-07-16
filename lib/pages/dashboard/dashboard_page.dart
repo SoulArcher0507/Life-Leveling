@@ -6,6 +6,7 @@ import 'package:life_leveling/pages/dashboard/livello_dettagli_page.dart';
 import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 import 'package:intl/intl.dart';
 import 'package:life_leveling/services/fatigue_service.dart';
+import 'package:life_leveling/services/level_service.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
@@ -15,13 +16,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // Dati utente (esempio)
+  // Dati utente
   final String userName = 'Corrado Enea Crevatin';
-  final int currentLevel = 1;
-  final double currentXP = 0;
-  final double requiredXP = 10.0;
-  final String userClass = 'Principiante';
-  final String userAbilities = 'Vivere';
 
   bool _isOverdue(QuestData quest) {
     final now = DateTime.now();
@@ -54,6 +50,13 @@ class _DashboardPageState extends State<DashboardPage> {
     final top3Daily = dailyQuests.length > 3
         ? dailyQuests.sublist(0, 3)
         : dailyQuests;
+
+    final levelService = LevelService();
+    final currentLevel = levelService.level;
+    final currentXP = levelService.xp;
+    final requiredXP = levelService.requiredXp;
+    final userClass = levelService.currentClass.name;
+    final userAbilities = levelService.currentClass.abilities.join(', ');
 
     return SingleChildScrollView(
       child: Padding(
@@ -251,7 +254,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ? Colors.red
                       : dailyFatigue > 50
                           ? Colors.orange
-                          : Colors.black,
+                          : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                 ),
           ),
         ],

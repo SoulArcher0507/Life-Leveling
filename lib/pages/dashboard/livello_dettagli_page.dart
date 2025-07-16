@@ -79,7 +79,7 @@ class LivelloDettagliPage extends StatelessWidget {
                         ? Colors.red
                         : dailyFatigue > 50
                             ? Colors.orange
-                            : Colors.black,
+                            : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                   ),
             ),
 

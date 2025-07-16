@@ -14,3 +14,9 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Classes
+
+You can define your own character classes inside `lib/classes`. The
+`example_classes.dart` file provides some sample classes that the app uses by
+default. Add your classes to this folder to extend the level progression.
