@@ -3,6 +3,7 @@ import 'package:life_leveling/models/project_models.dart';
 import 'package:intl/intl.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
+import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 
 const List<String> kTaskStatusOptions = [
   '',
@@ -32,6 +33,17 @@ class _ProgettiPageState extends State<ProgettiPage> {
     setState(() {
       item.values[0] = kTaskStatusOptions[nextIndex];
     });
+  }
+
+  Future<void> _openQuestDetails(BoardItem item) async {
+    if (item.quest == null) return;
+    final deleted = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuestDetailsPage(quest: item.quest!),
+      ),
+    );
+    if (deleted == true) setState(() {});
   }
 
   Widget _statusChip(String status) {
@@ -165,37 +177,49 @@ class _ProgettiPageState extends State<ProgettiPage> {
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: SizedBox(
-            width: kItemColumnWidth +
-                board.columns.length * kValueColumnWidth +
-                kActionsColumnWidth,
-            child: DataTable(
-              columnSpacing: 0,
-              columns: [
-                const DataColumn(
-                    label: SizedBox(
-                  width: kItemColumnWidth,
-                  child: Text('Item'),
-                )),
+          child: Builder(
+            builder: (context) {
+              final screenWidth = MediaQuery.of(context).size.width;
+              final minWidth = kItemColumnWidth +
+                  board.columns.length * kValueColumnWidth +
+                  kActionsColumnWidth;
+              final tableWidth = screenWidth > minWidth ? screenWidth : minWidth;
+              final valueWidth =
+                  (tableWidth - kItemColumnWidth - kActionsColumnWidth) /
+                      board.columns.length;
+              return SizedBox(
+                width: tableWidth,
+                child: DataTable(
+                  columnSpacing: 0,
+                  columns: [
+                    const DataColumn(
+                        label: SizedBox(
+                          width: kItemColumnWidth,
+                          child: Text('Item'),
+                        )),
                 ...board.columns.map((c) => DataColumn(
                         label: SizedBox(
-                      width: kValueColumnWidth,
-                      child: Text(c),
-                    ))),
+                          width: valueWidth,
+                          child: Text(c),
+                        ))),
                 const DataColumn(
                     label: SizedBox(width: kActionsColumnWidth, child: Text(''))),
+                  ],
+                  rows: [
+                for (final item in group.items)
+                  ..._buildItemRows(item, valueWidth: valueWidth),
               ],
-              rows: [
-                for (final item in group.items) ..._buildItemRows(item),
-              ],
-            ),
+                ),
+              );
+            },
           ),
         ),
       ],
     );
   }
 
-  List<DataRow> _buildItemRows(BoardItem item, {int indent = 0}) {
+  List<DataRow> _buildItemRows(BoardItem item,
+      {int indent = 0, required double valueWidth}) {
     final firstCell = Padding(
       padding: EdgeInsets.only(left: indent * 16.0),
       child: Row(
@@ -212,14 +236,14 @@ class _ProgettiPageState extends State<ProgettiPage> {
       ),
     );
 
-    final cells = <DataCell>[DataCell(SizedBox(width: kItemColumnWidth, child: firstCell))];
+    final cells = <DataCell>[DataCell(SizedBox(width: kItemColumnWidth, child: firstCell), onTap: () => _openQuestDetails(item))];
     for (int i = 0; i < item.values.length; i++) {
       final value = item.values[i];
       if (i == 0) {
         cells.add(
           DataCell(
             SizedBox(
-              width: kValueColumnWidth,
+              width: valueWidth,
               child: InkWell(
                 onTap: () => _toggleTaskStatus(item),
                 child: _statusChip(value),
@@ -228,7 +252,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           ),
         );
       } else {
-        cells.add(DataCell(SizedBox(width: kValueColumnWidth, child: Text(value))));
+        cells.add(DataCell(SizedBox(width: valueWidth, child: Text(value))));
       }
     }
 
@@ -250,11 +274,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
         (states) => _statusColor(item.values.first).withOpacity(0.2),
       ),
       cells: cells,
+      onSelectChanged: (_) => _openQuestDetails(item),
     );
 
     final rows = <DataRow>[row];
     for (final sub in item.subItems) {
-      rows.addAll(_buildItemRows(sub, indent: indent + 1));
+      rows.addAll(_buildItemRows(sub, indent: indent + 1, valueWidth: valueWidth));
     }
     return rows;
   }
@@ -471,26 +496,26 @@ class _ProgettiPageState extends State<ProgettiPage> {
             TextButton(
               onPressed: () async {
                 final xp = int.tryParse(xpController.text) ?? 0;
+                final quest = QuestData(
+                  title: titleController.text,
+                  deadline: dueController.text.isNotEmpty
+                      ? DateTime.parse(dueController.text)
+                      : DateTime.now(),
+                  isDaily: false,
+                  xp: xp,
+                  notes: '',
+                  fatigue: fatigue,
+                );
                 setState(() {
                   group.items.add(BoardItem(
                     title: titleController.text,
                     xp: xp,
                     fatigue: fatigue,
                     values: [selectedStatus, dueController.text],
+                    quest: quest,
                   ));
                 });
-                await QuestService().addQuest(
-                  QuestData(
-                    title: titleController.text,
-                    deadline: dueController.text.isNotEmpty
-                        ? DateTime.parse(dueController.text)
-                        : DateTime.now(),
-                    isDaily: false,
-                    xp: xp,
-                    notes: '',
-                    fatigue: fatigue,
-                  ),
-                );
+                await QuestService().addQuest(quest);
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -576,6 +601,16 @@ class _ProgettiPageState extends State<ProgettiPage> {
             TextButton(
               onPressed: () async {
                 final xp = int.tryParse(xpController.text) ?? 0;
+                final quest = QuestData(
+                  title: titleController.text,
+                  deadline: dueController.text.isNotEmpty
+                      ? DateTime.parse(dueController.text)
+                      : DateTime.now(),
+                  isDaily: false,
+                  xp: xp,
+                  notes: '',
+                  fatigue: fatigue,
+                );
                 setState(() {
                   parent.subItems.add(
                     BoardItem(
@@ -583,21 +618,11 @@ class _ProgettiPageState extends State<ProgettiPage> {
                       xp: xp,
                       fatigue: fatigue,
                       values: [selectedStatus, dueController.text],
+                      quest: quest,
                     ),
                   );
                 });
-                await QuestService().addQuest(
-                  QuestData(
-                    title: titleController.text,
-                    deadline: dueController.text.isNotEmpty
-                        ? DateTime.parse(dueController.text)
-                        : DateTime.now(),
-                    isDaily: false,
-                    xp: xp,
-                    notes: '',
-                    fatigue: fatigue,
-                  ),
-                );
+                await QuestService().addQuest(quest);
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -632,38 +657,86 @@ class _ProgettiPageState extends State<ProgettiPage> {
           name: 'To Do',
           color: Colors.blue,
           items: [
-            BoardItem(
-              title: 'Task 1',
-              xp: 10,
-              fatigue: 5,
-              values: ['Working on it', '2023-12-01'],
-              subItems: [
-                BoardItem(
-                  title: 'Subtask 1',
-                  xp: 5,
-                  fatigue: 3,
-                  values: ['Done', ''],
-                ),
-              ],
-            ),
-            BoardItem(
-              title: 'Task 2',
-              xp: 15,
-              fatigue: 7,
-              values: ['Stuck', '2023-11-15'],
-            ),
+            () {
+              final q = QuestData(
+                title: 'Task 1',
+                deadline: DateTime.parse('2023-12-01'),
+                isDaily: false,
+                xp: 10,
+                notes: '',
+                fatigue: 5,
+              );
+              QuestService().addQuest(q);
+              return BoardItem(
+                title: 'Task 1',
+                xp: 10,
+                fatigue: 5,
+                values: ['Working on it', '2023-12-01'],
+                quest: q,
+                subItems: [
+                  () {
+                    final sq = QuestData(
+                      title: 'Subtask 1',
+                      deadline: DateTime.now(),
+                      isDaily: false,
+                      xp: 5,
+                      notes: '',
+                      fatigue: 3,
+                    );
+                    QuestService().addQuest(sq);
+                    return BoardItem(
+                      title: 'Subtask 1',
+                      xp: 5,
+                      fatigue: 3,
+                      values: ['Done', ''],
+                      quest: sq,
+                    );
+                  }(),
+                ],
+              );
+            }(),
+            () {
+              final q = QuestData(
+                title: 'Task 2',
+                deadline: DateTime.parse('2023-11-15'),
+                isDaily: false,
+                xp: 15,
+                notes: '',
+                fatigue: 7,
+              );
+              QuestService().addQuest(q);
+              return BoardItem(
+                title: 'Task 2',
+                xp: 15,
+                fatigue: 7,
+                values: ['Stuck', '2023-11-15'],
+                quest: q,
+              );
+            }(),
           ],
         ),
         BoardGroup(
           name: 'Done',
           color: Colors.green,
           items: [
-            BoardItem(
-              title: 'Task 3',
-              xp: 20,
-              fatigue: 10,
-              values: ['Done', '2023-10-01'],
-            ),
+            () {
+              final q = QuestData(
+                title: 'Task 3',
+                deadline: DateTime.parse('2023-10-01'),
+                isDaily: false,
+                xp: 20,
+                notes: '',
+                fatigue: 10,
+              );
+              QuestService().addQuest(q);
+              return BoardItem(
+                title: 'Task 3',
+                xp: 20,
+                fatigue: 10,
+                values: ['Done', '2023-10-01'],
+                quest: q,
+              );
+            }(),
           ],
         ),
       ],

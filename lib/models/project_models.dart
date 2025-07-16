@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'quest_model.dart';
 
 class Workspace {
   final String name;
@@ -58,11 +59,13 @@ class BoardItem {
   final int fatigue;
   final List<String> values;
   final List<BoardItem> subItems;
+  final QuestData? quest;
 
   BoardItem({
     required this.title,
     this.xp = 0,
     this.fatigue = 0,
+    this.quest,
     List<String>? values,
     List<BoardItem>? subItems,
   })  : values = List<String>.from(values ?? <String>[]),
