@@ -19,6 +19,25 @@ class _ProgettiPageState extends State<ProgettiPage> {
   late List<Workspace> _workspaces;
   int _selectedWorkspace = 0;
 
+  void _toggleTaskStatus(BoardItem item) {
+    final currentIndex = kTaskStatusOptions.indexOf(item.values.first);
+    final nextIndex = (currentIndex + 1) % kTaskStatusOptions.length;
+    setState(() {
+      item.values[0] = kTaskStatusOptions[nextIndex];
+    });
+  }
+
+  Widget _statusChip(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _statusColor(status),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(status, style: const TextStyle(color: Colors.white)),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -162,11 +181,18 @@ class _ProgettiPageState extends State<ProgettiPage> {
     final cells = <DataCell>[DataCell(firstCell)];
     for (int i = 0; i < item.values.length; i++) {
       final value = item.values[i];
-      TextStyle? style;
       if (i == 0) {
-        style = TextStyle(color: _statusColor(value));
+        cells.add(
+          DataCell(
+            InkWell(
+              onTap: () => _toggleTaskStatus(item),
+              child: _statusChip(value),
+            ),
+          ),
+        );
+      } else {
+        cells.add(DataCell(Text(value)));
       }
-      cells.add(DataCell(Text(value, style: style)));
     }
 
     final row = DataRow(cells: cells);
@@ -337,8 +363,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   for (final status in kTaskStatusOptions)
                     DropdownMenuItem(
                       value: status,
-                      child: Text(status,
-                          style: TextStyle(color: _statusColor(status))),
+                      child: _statusChip(status),
                     ),
                 ],
                 decoration: const InputDecoration(labelText: 'Status'),
