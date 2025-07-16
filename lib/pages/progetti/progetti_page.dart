@@ -27,21 +27,36 @@ class _ProgettiPageState extends State<ProgettiPage> {
   @override
   Widget build(BuildContext context) {
     final workspace = _workspaces[_selectedWorkspace];
-    return Row(
+    return Column(
       children: [
-        NavigationRail(
-          selectedIndex: _selectedWorkspace,
-          labelType: NavigationRailLabelType.all,
-          onDestinationSelected: (index) {
-            setState(() => _selectedWorkspace = index);
-          },
-          destinations: [
-            for (final ws in _workspaces)
-              NavigationRailDestination(
-                icon: const Icon(Icons.workspaces_outline),
-                label: Text(ws.name),
+        Container(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              DropdownButton<int>(
+                value: _selectedWorkspace,
+                onChanged: (index) {
+                  if (index != null) {
+                    setState(() => _selectedWorkspace = index);
+                  }
+                },
+                items: [
+                  for (int i = 0; i < _workspaces.length; i++)
+                    DropdownMenuItem(
+                      value: i,
+                      child: Text(_workspaces[i].name),
+                    ),
+                ],
               ),
-          ],
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: _showAddWorkspaceDialog,
+                icon: const Icon(Icons.add),
+                label: const Text('New Workspace'),
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: ListView(
@@ -155,6 +170,36 @@ class _ProgettiPageState extends State<ProgettiPage> {
       rows.addAll(_buildItemRows(sub, indent: indent + 1));
     }
     return rows;
+  }
+
+  Future<void> _showAddWorkspaceDialog() async {
+    final nameController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('New Workspace'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(labelText: 'Workspace name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _workspaces.add(Workspace(name: nameController.text, boards: []));
+                _selectedWorkspace = _workspaces.length - 1;
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _showAddBoardDialog(Workspace workspace) async {
