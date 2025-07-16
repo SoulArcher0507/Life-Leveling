@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
 
+const List<String> kTaskStatusOptions = [
+  'Done',
+  'Working on it',
+  'Stuck',
+];
+
 class ProgettiPage extends StatefulWidget {
   const ProgettiPage({Key? key}) : super(key: key);
 
@@ -152,114 +158,203 @@ class _ProgettiPageState extends State<ProgettiPage> {
   }
 
   Future<void> _showAddBoardDialog(Workspace workspace) async {
-    final controller = TextEditingController();
+    final nameController = TextEditingController();
+    final columnControllers = <TextEditingController>[
+      TextEditingController(text: 'Status'),
+      TextEditingController(text: 'Due'),
+    ];
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('New Board'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Board name'),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('New Board'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Board name'),
+                ),
+                const SizedBox(height: 8),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Columns'),
+                ),
+                ...[
+                  for (final controller in columnControllers)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: TextField(
+                        controller: controller,
+                        decoration:
+                            const InputDecoration(labelText: 'Column name'),
+                      ),
+                    ),
+                ],
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      columnControllers.add(TextEditingController());
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Column'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final columns = columnControllers
+                    .map((c) => c.text)
+                    .where((t) => t.trim().isNotEmpty)
+                    .toList();
+                setState(() {
+                  workspace.boards.add(Board(
+                    name: nameController.text,
+                    columns: columns.isEmpty ? ['Status', 'Due'] : columns,
+                    groups: [],
+                  ));
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                workspace.boards.add(Board(
-                  name: controller.text,
-                  columns: ['Status', 'Due'],
-                  groups: [],
-                ));
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
 
   Future<void> _showAddGroupDialog(Board board) async {
-    final controller = TextEditingController();
+    final nameController = TextEditingController();
+    Color selectedColor = Colors.grey;
+    const colorOptions = {
+      'Grey': Colors.grey,
+      'Blue': Colors.blue,
+      'Green': Colors.green,
+      'Red': Colors.red,
+    };
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('New Group'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Group name'),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('New Group'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Group name'),
+              ),
+              const SizedBox(height: 8),
+              DropdownButton<Color>(
+                value: selectedColor,
+                onChanged: (color) {
+                  if (color != null) setState(() => selectedColor = color);
+                },
+                items: [
+                  for (final entry in colorOptions.entries)
+                    DropdownMenuItem(
+                      value: entry.value,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            color: entry.value,
+                            margin: const EdgeInsets.only(right: 8),
+                          ),
+                          Text(entry.key),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  board.groups.add(BoardGroup(
+                    name: nameController.text,
+                    color: selectedColor,
+                    items: [],
+                  ));
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                board.groups.add(BoardGroup(
-                  name: controller.text,
-                  color: Colors.grey,
-                  items: [],
-                ));
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
 
   Future<void> _showAddTaskDialog(Board board, BoardGroup group) async {
     final titleController = TextEditingController();
-    final statusController = TextEditingController();
+    String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
     await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('New Task'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('New Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              DropdownButtonFormField<String>(
+                value: selectedStatus,
+                onChanged: (val) {
+                  if (val != null) setState(() => selectedStatus = val);
+                },
+                items: [
+                  for (final status in kTaskStatusOptions)
+                    DropdownMenuItem(value: status, child: Text(status)),
+                ],
+                decoration: const InputDecoration(labelText: 'Status'),
+              ),
+              TextField(
+                controller: dueController,
+                decoration: const InputDecoration(labelText: 'Due'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            TextField(
-              controller: statusController,
-              decoration: const InputDecoration(labelText: 'Status'),
-            ),
-            TextField(
-              controller: dueController,
-              decoration: const InputDecoration(labelText: 'Due'),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  group.items.add(BoardItem(
+                    title: titleController.text,
+                    values: [selectedStatus, dueController.text],
+                  ));
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                group.items.add(BoardItem(
-                  title: titleController.text,
-                  values: [statusController.text, dueController.text],
-                ));
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
