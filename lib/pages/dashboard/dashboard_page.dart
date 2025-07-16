@@ -65,23 +65,16 @@ class _DashboardPageState extends State<DashboardPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // --- Box Livello/XP Utente ---
-            _buildDashboardCard(
-              // Per uniformare lo stile, usiamo Card con Padding
-              child: _buildUserHeader(
-                context: context,
-                userName: userName,
-                currentLevel: currentLevel,
-                currentXP: currentXP,
-                requiredXP: requiredXP,
-                userClass: userClass,
-                userAbilities: userAbilities,
-                dailyFatigue: FatigueService().fatigue,
-              ),
+            // --- Sommario e statistiche giornaliere ---
+            _buildSummaryStatsCard(
+              context: context,
+              userName: userName,
+              currentLevel: currentLevel,
+              currentXP: currentXP,
+              requiredXP: requiredXP,
+              userClass: userClass,
+              userAbilities: userAbilities,
             ),
-            const SizedBox(height: 24.0),
-
-            _buildStatsCard(context),
             const SizedBox(height: 24.0),
 
             // --- Box Quest ad Alta Priorità ---
@@ -171,7 +164,15 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildStatsCard(BuildContext context) {
+  Widget _buildSummaryStatsCard({
+    required BuildContext context,
+    required String userName,
+    required int currentLevel,
+    required double currentXP,
+    required double requiredXP,
+    required String userClass,
+    required String userAbilities,
+  }) {
     final stats = StatsService().getStats(_statsDate);
     return _buildDashboardCard(
       child: Column(
@@ -203,6 +204,17 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
           const SizedBox(height: 8),
+          _buildUserHeader(
+            context: context,
+            userName: userName,
+            currentLevel: currentLevel,
+            currentXP: currentXP,
+            requiredXP: requiredXP,
+            userClass: userClass,
+            userAbilities: userAbilities,
+            dailyFatigue: stats.fatigue,
+          ),
+          const SizedBox(height: 16),
           Text(
             'Quest completate: ${stats.questsCompleted}',
             style: Theme.of(context).textTheme.bodyMedium,
