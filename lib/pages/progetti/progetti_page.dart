@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
 import 'package:intl/intl.dart';
-<<<<<<< HEAD
-import 'package:life_leveling/models/quest_model.dart';
-import 'package:life_leveling/services/quest_service.dart';
-import 'package:life_leveling/pages/quests/quest_detail_page.dart';
-=======
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
 
 const List<String> kTaskStatusOptions = [
   '',
@@ -456,8 +450,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
     final titleController = TextEditingController();
     String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
-    final xpController = TextEditingController();
-    int fatigue = 0;
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -509,33 +501,13 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-<<<<<<< HEAD
-              onPressed: () async {
-                final xp = int.tryParse(xpController.text) ?? 0;
-                final quest = QuestData(
-                  title: titleController.text,
-                  deadline: dueController.text.isNotEmpty
-                      ? DateTime.parse(dueController.text)
-                      : DateTime.now(),
-                  isDaily: false,
-                  xp: xp,
-                  notes: '',
-                  fatigue: fatigue,
-                );
-=======
               onPressed: () {
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 setState(() {
                   group.items.add(BoardItem(
                     title: titleController.text,
                     values: [selectedStatus, dueController.text],
-                    quest: quest,
                   ));
                 });
-<<<<<<< HEAD
-                await QuestService().addQuest(quest);
-=======
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -602,22 +574,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-<<<<<<< HEAD
-              onPressed: () async {
-                final xp = int.tryParse(xpController.text) ?? 0;
-                final quest = QuestData(
-                  title: titleController.text,
-                  deadline: dueController.text.isNotEmpty
-                      ? DateTime.parse(dueController.text)
-                      : DateTime.now(),
-                  isDaily: false,
-                  xp: xp,
-                  notes: '',
-                  fatigue: fatigue,
-                );
-=======
               onPressed: () {
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 setState(() {
                   parent.subItems.add(
                     BoardItem(
@@ -627,10 +584,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
                     ),
                   );
                 });
-<<<<<<< HEAD
-                await QuestService().addQuest(quest);
-=======
->>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 Navigator.pop(context);
               },
               child: const Text('Add'),
