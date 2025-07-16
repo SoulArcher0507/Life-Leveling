@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
 import 'package:intl/intl.dart';
+import 'package:life_leveling/models/quest_model.dart';
+import 'package:life_leveling/services/quest_service.dart';
+import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 
 const List<String> kTaskStatusOptions = [
   '',
@@ -580,7 +583,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
                     BoardItem(
                       title: titleController.text,
                       values: [selectedStatus, dueController.text],
-                      quest: quest,
                     ),
                   );
                 });
