@@ -151,22 +151,26 @@ class _QuestsPageState extends State<QuestsPage> {
                 ),
                 TextButton(
                   onPressed: () async {
+                    final selectedDate =
+                        _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex));
                     final DateTime? picked = await showDatePicker(
                       context: context,
-                      initialDate: _mondayOfCurrentWeek,
+                      initialDate: selectedDate,
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
                     );
                     if (picked != null) {
                       setState(() {
-                        // ricavo il Lunedì della settimana scelta
-                        _mondayOfCurrentWeek = picked.subtract(Duration(days: picked.weekday - 1));  
-                        _selectedDayIndex = 0;                                                         
+                        _mondayOfCurrentWeek =
+                            picked.subtract(Duration(days: picked.weekday - 1));
+                        _selectedDayIndex = picked.weekday - 1;
                       });
                     }
                   },
                   child: Text(
-                    DateFormat('MMMM yyyy').format(_mondayOfCurrentWeek),                        
+                    DateFormat('dd MMMM yyyy').format(
+                      _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex)),
+                    ),
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
