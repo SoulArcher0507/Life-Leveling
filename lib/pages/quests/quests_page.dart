@@ -182,7 +182,7 @@ class _QuestsPageState extends State<QuestsPage> {
               ],
             ),
           ),
-          _buildDaysOfWeekRow(),
+          _buildDayNavigationRow(),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
           ),
@@ -220,59 +220,47 @@ class _QuestsPageState extends State<QuestsPage> {
     );
   }
 // da importare pacchetto esterno per calendario
-  Widget _buildDaysOfWeekRow() {
-    final List<Widget> dayWidgets = [];
-    for (int i = 0; i < 7; i++) {
-      final dayDate = _mondayOfCurrentWeek.add(Duration(days: i));
-      final dayNumber = dayDate.day;
-      final dayName = _daysOfWeek[i];
-      final isSelected = i == _selectedDayIndex;
+  Widget _buildDayNavigationRow() {
+    final selectedDate =
+        _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex));
+    final dayName = _daysOfWeek[_selectedDayIndex];
+    final formattedDate =
+        '$dayName ${DateFormat('dd/MM/yyyy').format(selectedDate)}';
 
-      dayWidgets.add(
-        GestureDetector(
-          onTap: () {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
             setState(() {
-              _selectedDayIndex = i;
+              _changeDay(-1);
             });
           },
-          child: Container(
-            width: 40,
-            padding: const EdgeInsets.all(4.0),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.blue : Colors.grey[300],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  dayName,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isSelected ? Colors.white : Colors.black,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                ),
-                Text(
-                  '$dayNumber',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isSelected ? Colors.white : Colors.black,
-                      ),
-                ),
-              ],
-            ),
-          ),
         ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: dayWidgets,
-      ),
+        Text(
+          formattedDate,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        IconButton(
+          icon: const Icon(Icons.arrow_forward),
+          onPressed: () {
+            setState(() {
+              _changeDay(1);
+            });
+          },
+        ),
+      ],
     );
+  }
+
+  void _changeDay(int delta) {
+    final currentDate =
+        _mondayOfCurrentWeek.add(Duration(days: _selectedDayIndex));
+    final newDate = currentDate.add(Duration(days: delta));
+    _mondayOfCurrentWeek =
+        newDate.subtract(Duration(days: newDate.weekday - 1));
+    _selectedDayIndex = newDate.weekday - 1;
   }
 
   Widget _buildQuestSection({
