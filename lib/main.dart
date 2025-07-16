@@ -4,6 +4,7 @@ import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/services/theme_service.dart';
 import 'package:life_leveling/services/fatigue_service.dart';
 import 'package:life_leveling/services/level_service.dart';
+import 'package:life_leveling/services/stats_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +12,7 @@ void main() async {
   await QuestService().init();
   await FatigueService().init();
   await LevelService().init();
+  await StatsService().init();
   final themeMode = await ThemeService().getThemeMode();
 
   runApp(MyApp(initialThemeMode: themeMode));
