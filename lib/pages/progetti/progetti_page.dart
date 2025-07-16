@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
 import 'package:intl/intl.dart';
+<<<<<<< HEAD
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/pages/quests/quest_detail_page.dart';
+=======
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
 
 const List<String> kTaskStatusOptions = [
   '',
@@ -498,21 +501,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   }
                 },
               ),
-              TextField(
-                controller: xpController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'XP'),
-              ),
-              const SizedBox(height: 8),
-              Text('Fatigue: $fatigue'),
-              Slider(
-                value: fatigue.toDouble(),
-                min: 0,
-                max: 100,
-                divisions: 100,
-                label: '$fatigue',
-                onChanged: (v) => setModalState(() => fatigue = v.round()),
-              ),
             ],
           ),
           actions: [
@@ -521,6 +509,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
+<<<<<<< HEAD
               onPressed: () async {
                 final xp = int.tryParse(xpController.text) ?? 0;
                 final quest = QuestData(
@@ -533,16 +522,20 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   notes: '',
                   fatigue: fatigue,
                 );
+=======
+              onPressed: () {
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 setState(() {
                   group.items.add(BoardItem(
                     title: titleController.text,
-                    xp: xp,
-                    fatigue: fatigue,
                     values: [selectedStatus, dueController.text],
                     quest: quest,
                   ));
                 });
+<<<<<<< HEAD
                 await QuestService().addQuest(quest);
+=======
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -557,8 +550,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
     final titleController = TextEditingController();
     String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
-    final xpController = TextEditingController();
-    int fatigue = 0;
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
@@ -603,21 +594,6 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   }
                 },
               ),
-              TextField(
-                controller: xpController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'XP'),
-              ),
-              const SizedBox(height: 8),
-              Text('Fatigue: $fatigue'),
-              Slider(
-                value: fatigue.toDouble(),
-                min: 0,
-                max: 100,
-                divisions: 100,
-                label: '$fatigue',
-                onChanged: (v) => setModalState(() => fatigue = v.round()),
-              ),
             ],
           ),
           actions: [
@@ -626,6 +602,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
+<<<<<<< HEAD
               onPressed: () async {
                 final xp = int.tryParse(xpController.text) ?? 0;
                 final quest = QuestData(
@@ -638,18 +615,22 @@ class _ProgettiPageState extends State<ProgettiPage> {
                   notes: '',
                   fatigue: fatigue,
                 );
+=======
+              onPressed: () {
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 setState(() {
                   parent.subItems.add(
                     BoardItem(
                       title: titleController.text,
-                      xp: xp,
-                      fatigue: fatigue,
                       values: [selectedStatus, dueController.text],
                       quest: quest,
                     ),
                   );
                 });
+<<<<<<< HEAD
                 await QuestService().addQuest(quest);
+=======
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -696,6 +677,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           name: 'To Do',
           color: Colors.blue,
           items: [
+<<<<<<< HEAD
             () {
               final q = QuestData(
                 title: 'Task 1',
@@ -752,12 +734,29 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 quest: q,
               );
             }(),
+=======
+            BoardItem(
+              title: 'Task 1',
+              values: ['Working on it', '2023-12-01'],
+              subItems: [
+                BoardItem(
+                  title: 'Subtask 1',
+                  values: ['Done', ''],
+                ),
+              ],
+            ),
+            BoardItem(
+              title: 'Task 2',
+              values: ['Stuck', '2023-11-15'],
+            ),
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
           ],
         ),
         BoardGroup(
           name: 'Done',
           color: Colors.green,
           items: [
+<<<<<<< HEAD
             () {
               final q = QuestData(
                 title: 'Task 3',
@@ -776,6 +775,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 quest: q,
               );
             }(),
+=======
+            BoardItem(
+              title: 'Task 3',
+              values: ['Done', '2023-10-01'],
+            ),
+>>>>>>> parent of 4f0caba (Add xp and fatigue to project tasks and sync with quests)
           ],
         ),
       ],
