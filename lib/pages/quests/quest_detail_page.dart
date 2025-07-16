@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/services/fatigue_service.dart';
+import 'package:life_leveling/services/level_service.dart';
 import 'package:intl/intl.dart';
 
 class QuestDetailsPage extends StatelessWidget {
@@ -18,6 +19,7 @@ class QuestDetailsPage extends StatelessWidget {
             icon: const Icon(Icons.check),
             onPressed: () async {
               await FatigueService().addFatigue(quest.fatigue);
+              await LevelService().addXp(quest.xp.toDouble());
               await QuestService().removeQuest(quest);
               Navigator.of(context).pop(true);
             },
