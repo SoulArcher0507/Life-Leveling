@@ -4,8 +4,7 @@ import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
 
 import 'package:life_leveling/pages/quests/quests_page.dart';
 import 'package:life_leveling/pages/settings/settings_page.dart';
-// import 'package:tuo_progetto/pages/progetti/progetti_page.dart';
-// import 'package:tuo_progetto/pages/grafici/grafici_page.dart';
+import 'package:life_leveling/pages/progetti/progetti_page.dart';
 
 class MyHomePage extends StatefulWidget {
   final ThemeMode currentThemeMode;
@@ -34,16 +33,10 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   // Lista di pagine corrispondenti alle sezioni.
-  // Assicurati di creare e importare le tue vere pagine.
   final List<Widget> _pages = [
     const DashboardPage(),
-    // ProgettiPage(),
+    const ProgettiPage(),
     const QuestsPage(),
-
-    // GraficiPage(),
-
-    Center(child: Text('Progetti Page Placeholder')),
-    Center(child: Text('Quests Page Placeholder')),
     Center(child: Text('Grafici Page Placeholder')),
   ];
 
