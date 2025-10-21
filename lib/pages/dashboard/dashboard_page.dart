@@ -243,17 +243,29 @@ class _DashboardPageState extends State<DashboardPage> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 8),
-          // Display the current streak and freeze status.  The streak
-          // increments when at least 60% of the daily XP goal is met and
-          // resets otherwise (unless a freeze is available).  Completing all
-          // quests grants a freeze for the next day.
-          Text(
-            'Streak: ${StatsService().currentStreak} day${StatsService().currentStreak == 1 ? '' : 's'}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          Text(
-            'Streak freeze: ${StatsService().hasStreakFreeze ? 'Available' : 'None'}',
-            style: Theme.of(context).textTheme.bodyMedium,
+          // Streak indicator styled in a Duolingo‑inspired manner.  A flame
+          // icon represents the current streak count and an ice icon
+          // indicates whether a freeze is available.  This provides a
+          // more visual feedback than plain text.
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department, color: Colors.orange),
+              const SizedBox(width: 4),
+              Text(
+                '${StatsService().currentStreak}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Text(
+                ' day${StatsService().currentStreak == 1 ? '' : 's'}',
+                style: const TextStyle(fontSize: 12),
+              ),
+              if (StatsService().hasStreakFreeze) ...[
+                const SizedBox(width: 12),
+                const Icon(Icons.ac_unit, color: Colors.lightBlueAccent),
+                const SizedBox(width: 4),
+                const Text('Freeze', style: TextStyle(fontSize: 12)),
+              ],
+            ],
           ),
         ],
       ),

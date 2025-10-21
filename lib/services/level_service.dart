@@ -43,8 +43,12 @@ class LevelService {
   }
 
   double _requiredXpForLevel(int lvl) {
+    // Base XP required for level 1 and growth factor.  A smaller growth
+    // factor (1.15) yields a smoother progression up to level 100,
+    // preventing the XP requirement from exploding exponentially too
+    // quickly while still increasing the challenge each level.
     const double baseXp = 100;
-    const double growth = 1.5;
+    const double growth = 1.15;
     return baseXp * pow(growth, lvl - 1);
   }
 
