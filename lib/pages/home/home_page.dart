@@ -5,6 +5,7 @@ import 'package:life_leveling/pages/dashboard/dashboard_page.dart';
 import 'package:life_leveling/pages/quests/quests_page.dart';
 import 'package:life_leveling/pages/settings/settings_page.dart';
 import 'package:life_leveling/pages/progetti/progetti_page.dart';
+import 'package:life_leveling/pages/dashboard/charts_page.dart';
 
 class MyHomePage extends StatefulWidget {
   final ThemeMode currentThemeMode;
@@ -37,7 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
     const DashboardPage(),
     const ProgettiPage(),
     const QuestsPage(),
-    Center(child: Text('Grafici Page Placeholder')),
+    // Charts page shows weekly and monthly statistics using custom bar charts.
+    const ChartsPage(),
   ];
 
   @override
