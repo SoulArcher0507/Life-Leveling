@@ -17,53 +17,86 @@ class QuestDetailsPage extends StatelessWidget {
         title: Text(quest.title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.check_circle_outline),
+            tooltip: 'Completa',
             onPressed: () async {
+              // Completa la quest: aggiunge fatica, esperienza e aggiorna statistiche
               await FatigueService().addFatigue(quest.fatigue);
               await LevelService().addXp(quest.xp.toDouble());
-              await StatsService()
-                  .recordQuestCompleted(xp: quest.xp.toDouble(), fatigue: quest.fatigue);
+              await StatsService().recordQuestCompleted(
+                  xp: quest.xp.toDouble(), fatigue: quest.fatigue);
               await QuestService().removeQuest(quest);
               Navigator.of(context).pop(true);
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete),
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Elimina',
             onPressed: () async {
-              // elimina e torna indietro
+              // Elimina la quest senza completarla
               await QuestService().removeQuest(quest);
               Navigator.of(context).pop(true);
             },
           ),
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Modifica',
             onPressed: () {
               // TODO: apri dialog di modifica
             },
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Titolo: ${quest.title}', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.text_fields),
+                  title: const Text('Titolo'),
+                  subtitle: Text(quest.title),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.calendar_today),
+                  title: Text('Scadenza'),
+                  subtitle: Text(
+                      "${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}"),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.star),
+                  title: const Text('XP'),
+                  subtitle: Text('${quest.xp}'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.fitness_center),
+                  title: const Text('Difficoltà'),
+                  subtitle: Text('${quest.fatigue}'),
+                ),
+                if (quest.notes.isNotEmpty)
+                  ListTile(
+                    leading: const Icon(Icons.notes),
+                    title: const Text('Note'),
+                    subtitle: Text(quest.notes),
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.repeat),
+                  title: const Text('Giornaliera'),
+                  subtitle: Text(quest.isDaily ? 'Sì' : 'No'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.loop),
+                  title: const Text('Ripetizione settimanale'),
+                  subtitle: Text(quest.repeatedWeekly ? 'Sì' : 'No'),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text('XP: ${quest.xp}'),
-            const SizedBox(height: 8),
-            Text('Fatigue: ${quest.fatigue}'),
-            const SizedBox(height: 8),
-            Text('Note: ${quest.notes}'),
-            const SizedBox(height: 8),
-            Text('Giorn.: ${quest.isDaily ? "Sì" : "No"}'),
-            const SizedBox(height: 8),
-            Text('Ripeti settimanale: ${quest.repeatedWeekly ? "Sì" : "No"}'),
-          ],
+          ),
         ),
       ),
     );

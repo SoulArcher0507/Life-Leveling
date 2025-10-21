@@ -222,7 +222,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
             Center(
               child: ElevatedButton(
                 onPressed: _createQuest,
-                child: const Text('CREA'),
+                child: const Text('Crea'),
               ),
             ),
           ],
@@ -240,13 +240,18 @@ class _NewQuestPageState extends State<NewQuestPage> {
 
     if (userIsDaily) {
       final now = DateTime.now();
+      // Normalizziamo la data corrente alle 00:00 per le quest giornaliere
       final startDate = DateTime(now.year, now.month, now.day);
       final endDate = repeatUntil != null
           ? DateTime(repeatUntil!.year, repeatUntil!.month, repeatUntil!.day)
           : startDate;
 
       if (selectedWeekDays.any((sel) => sel)) {
-        for (var d = startDate; !d.isAfter(endDate); d = d.add(const Duration(days: 1))) {
+        // L'utente ha selezionato dei giorni della settimana: creiamo una quest
+        // per ciascun giorno selezionato nel range [startDate, endDate].
+        for (var d = startDate;
+            !d.isAfter(endDate);
+            d = d.add(const Duration(days: 1))) {
           final idx = d.weekday - 1;
           if (selectedWeekDays[idx]) {
             final q = QuestData(
@@ -261,6 +266,19 @@ class _NewQuestPageState extends State<NewQuestPage> {
             await QuestService().addQuest(q);
           }
         }
+      } else {
+        // Nessun giorno selezionato: creiamo una singola quest giornaliera
+        // non ripetuta per la data corrente
+        final q = QuestData(
+          title: newTitle,
+          deadline: startDate,
+          isDaily: true,
+          xp: newXp,
+          notes: newNotes,
+          repeatedWeekly: false,
+          fatigue: fatigue,
+        );
+        await QuestService().addQuest(q);
       }
     } else {
       final baseDate = selectedDeadline != null

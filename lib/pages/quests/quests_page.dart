@@ -33,13 +33,14 @@ class _QuestsPageState extends State<QuestsPage> {
     if (widget.questType == QuestType.highPriority) {
       return _buildFilteredScaffold(
         context: context,
-        title: 'Quest ad Alta Priorità',
+        // Titolo in italiano con la prima lettera maiuscola solo per la prima parola
+        title: 'Quest ad alta priorità',
         isDaily: false,
       );
     } else if (widget.questType == QuestType.daily) {
       return _buildFilteredScaffold(
         context: context,
-        title: 'Quest Giornaliere',
+        title: 'Quest giornaliere',
         isDaily: true,
       );
     } else {
@@ -78,7 +79,7 @@ class _QuestsPageState extends State<QuestsPage> {
                     TextStyle(color: _isOverdue(quest) ? Colors.red : null),
               ),
               subtitle: quest.isDaily
-                  ? Text('Quest Giornaliera',
+                  ? Text('Quest giornaliera',
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null))
                   : Text(
@@ -144,13 +145,13 @@ class _QuestsPageState extends State<QuestsPage> {
                 child: Column(
                   children: [
                     _buildQuestSection(
-                      title: 'Quest ad Alta Priorità',
+                      title: 'Quest ad alta priorità',
                       quests: highPriorityQuests,
                       context: context,
                     ),
                     const SizedBox(height: 16),
                     _buildQuestSection(
-                      title: 'Quest Giornaliere',
+                      title: 'Quest giornaliere',
                       quests: dailyQuests,
                       context: context,
                     ),
@@ -261,7 +262,7 @@ class _QuestsPageState extends State<QuestsPage> {
                       ),
                       subtitle: Text(
                         quest.isDaily
-                            ? 'Quest Giornaliera'
+                            ? 'Quest giornaliera'
                             : "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
                         style:
                             TextStyle(color: _isOverdue(quest) ? Colors.red : null),

@@ -30,9 +30,16 @@ class QuestService {
     }
   }
 
-  // Aggiunge una quest e salva
+  // Aggiunge una quest. Se esiste già una quest con lo stesso id,
+  // viene sostituita; altrimenti viene aggiunta. In questo modo
+  // evitiamo duplicazioni accidentali (ad esempio al riavvio dell'app).
   Future<void> addQuest(QuestData quest) async {
-    _allQuests.add(quest);
+    final existingIndex = _allQuests.indexWhere((q) => q.id == quest.id);
+    if (existingIndex != -1) {
+      _allQuests[existingIndex] = quest;
+    } else {
+      _allQuests.add(quest);
+    }
     await _save();
   }
 
@@ -47,14 +54,17 @@ class QuestService {
     await prefs.setString(_prefsKey, jsonString);
   }
 
+  /// Rimuove una quest basandosi sul suo id. In questo modo anche se
+  /// l'oggetto passato non è lo stesso istanza contenuta nella lista,
+  /// la quest corretta verrà rimossa.
   Future<void> removeQuest(QuestData quest) async {
-    _allQuests.remove(quest);
+    _allQuests.removeWhere((q) => q.id == quest.id);
     await _save();
   }
 
   /// Aggiorna una quest esistente (sostituisce oldQuest con newQuest)
   Future<void> updateQuest(QuestData oldQuest, QuestData newQuest) async {
-    final idx = _allQuests.indexOf(oldQuest);
+    final idx = _allQuests.indexWhere((q) => q.id == oldQuest.id);
     if (idx != -1) {
       _allQuests[idx] = newQuest;
       await _save();
