@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:life_leveling/models/project_models.dart';
+import 'package:life_leveling/services/project_service.dart';
 import 'package:intl/intl.dart';
 import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
@@ -26,7 +27,10 @@ class ProgettiPage extends StatefulWidget {
 }
 
 class _ProgettiPageState extends State<ProgettiPage> {
-  late List<Workspace> _workspaces;
+  // Maintain a list of workspaces obtained from the ProjectService.  We
+  // initialise it to an empty list to avoid null accesses while the
+  // asynchronous initialisation completes.
+  List<Workspace> _workspaces = [];
   int _selectedWorkspace = 0;
 
   void _toggleTaskStatus(BoardItem item) {
@@ -35,6 +39,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
     setState(() {
       item.values[0] = kTaskStatusOptions[nextIndex];
     });
+    // Persist status change
+    ProjectService().save();
   }
 
   Future<void> _openQuestDetails(
@@ -52,6 +58,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
       setState(() {
         parentList.remove(item);
       });
+      // Persist removal
+      ProjectService().save();
     }
   }
 
@@ -74,39 +82,77 @@ class _ProgettiPageState extends State<ProgettiPage> {
     // variabili non inizializzate nella build(). Il servizio delle
     // quest viene inizializzato in main.dart, quindi qui ci limitiamo
     // a generare i dati di esempio se necessario.
-    _workspaces = _createSampleData();
+    // Initialise the project service.  If no data exists on disk, use
+    // the sample data as a starting point.  Once initialised,
+    // _workspaces references the service's list so that changes persist.
+    final sample = _createSampleData();
+    ProjectService().init(sampleData: sample).then((_) {
+      setState(() {
+        _workspaces = ProjectService().workspaces;
+        // Ensure a valid selected workspace index
+        if (_selectedWorkspace >= _workspaces.length) {
+          _selectedWorkspace = _workspaces.isEmpty ? 0 : _workspaces.length - 1;
+        }
+      });
+    });
   }
 
   /// Rimuove un board dal workspace corrente o da qualsiasi cartella
   /// ricorsivamente. Dopo la rimozione il widget viene aggiornato.
   void _removeBoard(Board board) {
+    final workspace = _workspaces[_selectedWorkspace];
     setState(() {
-      // Try removing from the selected workspace top‑level boards
-      final workspace = _workspaces[_selectedWorkspace];
+      // Remove board from top level or subfolders
       if (workspace.boards.remove(board)) {
-        return;
-      }
-
-      // Recursively search in folders
-      bool removed = false;
-      void removeFromFolder(WorkspaceFolder folder) {
-        if (folder.boards.remove(board)) {
-          removed = true;
-          return;
+        // removed
+      } else {
+        bool removed = false;
+        void removeFromFolder(WorkspaceFolder folder) {
+          if (folder.boards.remove(board)) {
+            removed = true;
+            return;
+          }
+          for (final sub in folder.subFolders) {
+            if (!removed) removeFromFolder(sub);
+          }
         }
-        for (final sub in folder.subFolders) {
-          if (!removed) removeFromFolder(sub);
+        for (final folder in workspace.folders) {
+          if (!removed) removeFromFolder(folder);
         }
-      }
-
-      for (final folder in workspace.folders) {
-        if (!removed) removeFromFolder(folder);
       }
     });
+    // Persist changes
+    ProjectService().save();
   }
 
   @override
   Widget build(BuildContext context) {
+    // If no workspace data has been loaded yet, show a placeholder that
+    // prompts the user to create a new workspace.  This prevents a
+    // RangeError when accessing an empty list.
+    if (_workspaces.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'No workspaces found.',
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: _showAddWorkspaceDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('Create Workspace'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // At least one workspace is available; display the selected workspace's
+    // boards and folders.  Compute the current workspace based on
+    // _selectedWorkspace index.
     final workspace = _workspaces[_selectedWorkspace];
     return Column(
       children: [
@@ -136,6 +182,48 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 icon: const Icon(Icons.add),
                 label: const Text('New Workspace'),
               ),
+              const SizedBox(width: 8),
+              // Delete workspace button.  Only enabled when there is at least one workspace
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Delete Workspace',
+                onPressed: () async {
+                  final ws = _workspaces[_selectedWorkspace];
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Workspace'),
+                      content: Text(
+                          'Are you sure you want to delete the workspace "${ws.name}"? This cannot be undone.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    // Remove the workspace via the project service to
+                    // persist changes.  The local list _workspaces is a
+                    // reference to the service's list, so no separate
+                    // removal is needed.
+                    await ProjectService().removeWorkspace(ws);
+                    setState(() {
+                      // Adjust the selected index if the last item was removed
+                      if (_selectedWorkspace >= _workspaces.length) {
+                        _selectedWorkspace = _workspaces.isEmpty
+                            ? 0
+                            : _workspaces.length - 1;
+                      }
+                    });
+                  }
+                },
+              ),
             ],
           ),
         ),
@@ -143,7 +231,9 @@ class _ProgettiPageState extends State<ProgettiPage> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              // Display each board in the current workspace
               for (final board in workspace.boards) _buildBoard(board),
+              // Display any nested folders (not commonly used in current UI)
               for (final folder in workspace.folders) _buildFolder(folder),
               const SizedBox(height: 16),
               ElevatedButton.icon(
@@ -181,16 +271,16 @@ class _ProgettiPageState extends State<ProgettiPage> {
             Text(board.name),
             Row(
               children: [
+                // Add Task button.  Adds a task to the default group of this board.
                 IconButton(
                   icon: const Icon(Icons.add),
-                  tooltip: 'Add Group',
-                  onPressed: () => _showAddGroupDialog(board),
+                  tooltip: 'Add Task',
+                  onPressed: () => _showAddTaskDialog(board),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   tooltip: 'Delete Board',
                   onPressed: () async {
-                    // Confirm deletion
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -218,7 +308,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           ],
         ),
         children: [
-          for (final group in board.groups) _buildGroup(board, group),
+          _buildTaskTable(board),
         ],
       ),
     );
@@ -240,7 +330,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 style: const TextStyle(color: Colors.white),
               ),
               IconButton(
-                onPressed: () => _showAddTaskDialog(board, group),
+                onPressed: () => _showAddTaskDialog(board),
                 icon: const Icon(Icons.add, color: Colors.white),
                 tooltip: 'Add Task',
               )
@@ -297,6 +387,54 @@ class _ProgettiPageState extends State<ProgettiPage> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Builds a DataTable that lists all tasks across every group in the
+  /// provided [board].  Groups are ignored and their items are flattened
+  /// into a single list.  The table uses the board's column definitions to
+  /// render each task's status and due date.  An action column allows
+  /// adding subtasks.
+  Widget _buildTaskTable(Board board) {
+    // Flatten items from all groups
+    final List<BoardItem> tasks = [];
+    for (final g in board.groups) {
+      tasks.addAll(g.items);
+    }
+    final screenWidth = MediaQuery.of(context).size.width;
+    final minWidth = kItemColumnWidth + board.columns.length * kValueColumnWidth + kActionsColumnWidth;
+    final tableWidth = screenWidth > minWidth ? screenWidth : minWidth;
+    final int columnCount = board.columns.length;
+    final double valueWidth = (tableWidth - kItemColumnWidth - kActionsColumnWidth) / columnCount;
+    return SizedBox(
+      width: tableWidth,
+      child: DataTable(
+        showCheckboxColumn: false,
+        columnSpacing: 0,
+        columns: [
+          const DataColumn(
+              label: SizedBox(
+            width: kItemColumnWidth,
+            child: Text('Item'),
+          )),
+          ...board.columns.map((c) => DataColumn(
+                label: SizedBox(
+                  width: valueWidth,
+                  child: Text(c),
+                ),
+              )),
+          const DataColumn(
+              label: SizedBox(width: kActionsColumnWidth, child: Text(''))),
+        ],
+        rows: [
+          for (final task in tasks) ..._buildItemRows(
+            task,
+            parentList: tasks,
+            columnCount: columnCount,
+            valueWidth: valueWidth,
+          ),
+        ],
+      ),
     );
   }
 
@@ -417,9 +555,17 @@ class _ProgettiPageState extends State<ProgettiPage> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              final newWs = Workspace(name: nameController.text, boards: []);
+              // Persist the new workspace via the project service.  The
+              // returned list of workspaces in ProjectService().workspaces
+              // already contains the newly added workspace, so we do not
+              // re-add it to our local list to avoid duplicates.  We
+              // simply update the selected index to the last workspace.
+              await ProjectService().addWorkspace(newWs);
               setState(() {
-                _workspaces.add(Workspace(name: nameController.text, boards: []));
+                // _workspaces is a reference to ProjectService().workspaces
+                // so it already contains newWs after the call above.
                 _selectedWorkspace = _workspaces.length - 1;
               });
               Navigator.pop(context);
@@ -447,15 +593,14 @@ class _ProgettiPageState extends State<ProgettiPage> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                workspace.boards.add(Board(
-                  name: nameController.text,
-                  // Default headers for the columns in English
-                  columns: const ['Status', 'Due'],
-                  groups: [],
-                ));
-              });
+            onPressed: () async {
+              final board = Board(
+                name: nameController.text,
+                columns: const ['Status', 'Due'],
+                groups: [],
+              );
+              await ProjectService().addBoard(workspace, board);
+              setState(() {});
               Navigator.pop(context);
             },
             child: const Text('Add'),
@@ -541,7 +686,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
     );
   }
 
-  Future<void> _showAddTaskDialog(Board board, BoardGroup group) async {
+  Future<void> _showAddTaskDialog(Board board) async {
     final titleController = TextEditingController();
     String selectedStatus = kTaskStatusOptions.first;
     final dueController = TextEditingController();
@@ -596,13 +741,17 @@ class _ProgettiPageState extends State<ProgettiPage> {
             child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  group.items.add(BoardItem(
-                    title: titleController.text,
-                    values: [selectedStatus, dueController.text],
-                  ));
-                });
+              onPressed: () async {
+                final newItem = BoardItem(
+                  title: titleController.text,
+                  values: [selectedStatus, dueController.text],
+                );
+                // Use the project service to add the item to the default group and
+                // persist the change.  Afterwards update the UI.
+                await ProjectService().addItem(board, newItem);
+                if (mounted) {
+                  setState(() {});
+                }
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -669,7 +818,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 setState(() {
                   parent.subItems.add(
                     BoardItem(
@@ -678,6 +827,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
                     ),
                   );
                 });
+                // Persist changes to project data
+                await ProjectService().save();
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -715,103 +866,98 @@ class _ProgettiPageState extends State<ProgettiPage> {
         service.addQuest(q);
       }
     }
+    // Create sample tasks for demonstration.  All tasks live in a single
+    // default group; groups are not exposed in the UI.
+    final task1 = () {
+      final q = QuestData(
+        title: 'Task 1',
+        deadline: DateTime.parse('2023-12-01'),
+        isDaily: false,
+        xp: 10,
+        notes: '',
+        fatigue: 5,
+      );
+      maybeAddQuest(q);
+      return BoardItem(
+        title: 'Task 1',
+        xp: 10,
+        fatigue: 5,
+        // "In progress" indicates that the task has been started
+        values: ['In progress', '2023-12-01'],
+        quest: q,
+        subItems: [
+          () {
+            final sq = QuestData(
+              title: 'Subtask 1',
+              deadline: DateTime.now(),
+              isDaily: false,
+              xp: 5,
+              notes: '',
+              fatigue: 3,
+            );
+            maybeAddQuest(sq);
+            return BoardItem(
+              title: 'Subtask 1',
+              xp: 5,
+              fatigue: 3,
+              // Subtask completed
+              values: ['Completed', ''],
+              quest: sq,
+            );
+          }(),
+        ],
+      );
+    }();
+    final task2 = () {
+      final q = QuestData(
+        title: 'Task 2',
+        deadline: DateTime.parse('2023-11-15'),
+        isDaily: false,
+        xp: 15,
+        notes: '',
+        fatigue: 7,
+      );
+      maybeAddQuest(q);
+      return BoardItem(
+        title: 'Task 2',
+        xp: 15,
+        fatigue: 7,
+        // Task blocked
+        values: ['Blocked', '2023-11-15'],
+        quest: q,
+      );
+    }();
+    final task3 = () {
+      final q = QuestData(
+        title: 'Task 3',
+        deadline: DateTime.parse('2023-10-01'),
+        isDaily: false,
+        xp: 20,
+        notes: '',
+        fatigue: 10,
+      );
+      maybeAddQuest(q);
+      return BoardItem(
+        title: 'Task 3',
+        xp: 20,
+        fatigue: 10,
+        // Task completed
+        values: ['Completed', '2023-10-01'],
+        quest: q,
+      );
+    }();
     final board = Board(
       // Sample board in English for demonstration
       name: 'Sample Board',
       // Default columns in English: Status and Due
       columns: ['Status', 'Due'],
+      // Use a single default group to hold all tasks.  Groups are not
+      // exposed in the UI, so their name/colour is irrelevant.
       groups: [
         BoardGroup(
-          // Group for tasks to be done
-          name: 'To Do',
-          color: Colors.blue,
-          items: [
-            () {
-              final q = QuestData(
-                title: 'Task 1',
-                deadline: DateTime.parse('2023-12-01'),
-                isDaily: false,
-                xp: 10,
-                notes: '',
-                fatigue: 5,
-              );
-              maybeAddQuest(q);
-              return BoardItem(
-                title: 'Task 1',
-                xp: 10,
-                fatigue: 5,
-                // "In progress" indicates that the task has been started
-                values: ['In progress', '2023-12-01'],
-                quest: q,
-                subItems: [
-                  () {
-                    final sq = QuestData(
-                      title: 'Subtask 1',
-                      deadline: DateTime.now(),
-                      isDaily: false,
-                      xp: 5,
-                      notes: '',
-                      fatigue: 3,
-                    );
-                    maybeAddQuest(sq);
-                    return BoardItem(
-                      title: 'Subtask 1',
-                      xp: 5,
-                      fatigue: 3,
-                      // Subtask completed
-                      values: ['Completed', ''],
-                      quest: sq,
-                    );
-                  }(),
-                ],
-              );
-            }(),
-            () {
-              final q = QuestData(
-                title: 'Task 2',
-                deadline: DateTime.parse('2023-11-15'),
-                isDaily: false,
-                xp: 15,
-                notes: '',
-                fatigue: 7,
-              );
-              maybeAddQuest(q);
-              return BoardItem(
-                title: 'Task 2',
-                xp: 15,
-                fatigue: 7,
-                // Task blocked
-                values: ['Blocked', '2023-11-15'],
-                quest: q,
-              );
-            }(),
-          ],
-        ),
-        BoardGroup(
-          // Group for completed tasks
-          name: 'Completed',
-          color: Colors.green,
-          items: [
-            () {
-              final q = QuestData(
-                title: 'Task 3',
-                deadline: DateTime.parse('2023-10-01'),
-                isDaily: false,
-                xp: 20,
-                notes: '',
-                fatigue: 10,
-              );
-              maybeAddQuest(q);
-              return BoardItem(
-                title: 'Task 3',
-                xp: 20,
-                fatigue: 10,
-                // Task completed
-                values: ['Completed', '2023-10-01'],
-                quest: q,
-              );
-            }(),
-          ],
+          name: 'Default',
+          color: Colors.grey,
+          items: [task1, task2, task3],
         ),
       ],
     );
