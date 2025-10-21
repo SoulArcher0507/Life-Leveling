@@ -6,24 +6,42 @@ import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 import 'package:life_leveling/pages/quests/new_quest_page.dart';
 
 class QuestsPage extends StatefulWidget {
+  /// Optional quest type to show only high priority or daily quests. If null,
+  /// the page displays a weekly calendar view.
   final QuestType? questType;
-  const QuestsPage({Key? key, this.questType}) : super(key: key);
+
+  /// The date to display when the page is first opened.  If provided from
+  /// another screen (such as the dashboard), the list of quests will be
+  /// filtered to this day.  Defaults to [DateTime.now()].
+  final DateTime? initialDate;
+
+  const QuestsPage({Key? key, this.questType, this.initialDate}) : super(key: key);
 
   @override
   State<QuestsPage> createState() => _QuestsPageState();
 }
 
 class _QuestsPageState extends State<QuestsPage> {
-
+  /// The Monday of the week currently displayed in the weekly view.
   late DateTime _mondayOfCurrentWeek;
+  /// Index of the selected day in the weekly view (0 = Monday).
   int _selectedDayIndex = 0;
+
+  /// The currently selected date used in the filtered view.  This is
+  /// initialised from [widget.initialDate] if provided.
+  late DateTime _currentDate;
 
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    int weekday = now.weekday; // lun=1 ... dom=7
-    _mondayOfCurrentWeek = now.subtract(Duration(days: weekday - 1));
+    // Determine the initial date: provided by the widget or default to now.
+    final initDate = widget.initialDate ?? DateTime.now();
+    _currentDate = DateTime(initDate.year, initDate.month, initDate.day);
+    // Compute Monday of the week containing the initial date and set
+    // selectedDayIndex accordingly.  This supports deep linking from the
+    // dashboard into a particular day of the weekly view.
+    int weekday = initDate.weekday; // Monday = 1 .. Sunday = 7
+    _mondayOfCurrentWeek = initDate.subtract(Duration(days: weekday - 1));
     _selectedDayIndex = weekday - 1;
   }
 
@@ -50,56 +68,121 @@ class _QuestsPageState extends State<QuestsPage> {
   }
 
   // ---------------------------------------------
-  // 1) Filtrata
+  // 1) Filtered view (high priority or daily) for a specific date
   // ---------------------------------------------
   Widget _buildFilteredScaffold({
     required BuildContext context,
     required String title,
     required bool isDaily,
   }) {
-    // PRIMA: final filteredQuests = _allQuests.where(...)
-    // ORA: usiamo QuestService().allQuests
-    final filteredQuests =
-        QuestService().allQuests.where((q) => q.isDaily == isDaily).toList()
-          ..sort((a, b) => a.deadline.compareTo(b.deadline));
+    // Filter quests by type and the currently selected date. Only quests whose
+    // deadline matches `_currentDate` are displayed.  Daily quests repeat
+    // every day, so we use their deadline date as the starting reference.
+    final filteredQuests = QuestService()
+        .allQuests
+        .where((q) => q.isDaily == isDaily && isSameDay(q.deadline, _currentDate))
+        .toList()
+      ..sort((a, b) => a.deadline.compareTo(b.deadline));
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
-      body: ListView.builder(
-        itemCount: filteredQuests.length,
-        itemBuilder: (context, index) {
-          final quest = filteredQuests[index];
-          return Card(
-            child: ListTile(
-              title: Text(
-                quest.title,
-                style:
-                    TextStyle(color: _isOverdue(quest) ? Colors.red : null),
-              ),
-              subtitle: quest.isDaily
-                  ? Text('Daily',
-                      style:
-                          TextStyle(color: _isOverdue(quest) ? Colors.red : null))
-                  : Text(
-                      "Due: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
-                      style:
-                          TextStyle(color: _isOverdue(quest) ? Colors.red : null),
-                    ),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                final deleted = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => QuestDetailsPage(quest: quest),
+      body: Column(
+        children: [
+          // Date navigation row for filtered views
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() {
+                      _currentDate = _currentDate.subtract(const Duration(days: 1));
+                    });
+                  },
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: _currentDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _currentDate = DateTime(picked.year, picked.month, picked.day);
+                      });
+                    }
+                  },
+                  child: Text(
+                    DateFormat('dd/MM/yyyy').format(_currentDate),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                );
-                if (deleted == true) setState(() {});
-              },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () {
+                    setState(() {
+                      _currentDate = _currentDate.add(const Duration(days: 1));
+                    });
+                  },
+                ),
+              ],
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: filteredQuests.isEmpty
+                ? Center(
+                    child: Text(
+                      'No quests found for this day',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: filteredQuests.length,
+                    itemBuilder: (context, index) {
+                      final quest = filteredQuests[index];
+                      return Card(
+                        child: ListTile(
+                          title: Text(
+                            quest.title,
+                            style: TextStyle(
+                              color: _isOverdue(quest) ? Colors.red : null,
+                            ),
+                          ),
+                          subtitle: quest.isDaily
+                              ? Text(
+                                  'Daily',
+                                  style: TextStyle(
+                                      color:
+                                          _isOverdue(quest) ? Colors.red : null),
+                                )
+                              : Text(
+                                  "Due: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
+                                  style: TextStyle(
+                                      color:
+                                          _isOverdue(quest) ? Colors.red : null),
+                                ),
+                          trailing: const Icon(Icons.arrow_forward_ios),
+                          onTap: () async {
+                            final deleted = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => QuestDetailsPage(quest: quest),
+                              ),
+                            );
+                            if (deleted == true) setState(() {});
+                          },
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {

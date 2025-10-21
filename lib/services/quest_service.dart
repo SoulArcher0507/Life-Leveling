@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:life_leveling/models/quest_model.dart';
+import 'package:life_leveling/services/notification_service.dart';
 
 class QuestService {
   // Singleton: puoi accedere ovunque con QuestService()
@@ -41,6 +42,8 @@ class QuestService {
       _allQuests.add(quest);
     }
     await _save();
+    // Reschedule daily notifications to include this new quest
+    await NotificationService().scheduleDailyNotifications();
   }
 
   // Per rimuovere o aggiornare quest, aggiungere funzioni simili
@@ -60,6 +63,8 @@ class QuestService {
   Future<void> removeQuest(QuestData quest) async {
     _allQuests.removeWhere((q) => q.id == quest.id);
     await _save();
+    // Update notifications after removing a quest
+    await NotificationService().scheduleDailyNotifications();
   }
 
   /// Aggiorna una quest esistente (sostituisce oldQuest con newQuest)
@@ -68,6 +73,8 @@ class QuestService {
     if (idx != -1) {
       _allQuests[idx] = newQuest;
       await _save();
+      // Update notifications after modifying a quest
+      await NotificationService().scheduleDailyNotifications();
     }
   }
 }

@@ -77,6 +77,34 @@ class _ProgettiPageState extends State<ProgettiPage> {
     _workspaces = _createSampleData();
   }
 
+  /// Rimuove un board dal workspace corrente o da qualsiasi cartella
+  /// ricorsivamente. Dopo la rimozione il widget viene aggiornato.
+  void _removeBoard(Board board) {
+    setState(() {
+      // Try removing from the selected workspace top‑level boards
+      final workspace = _workspaces[_selectedWorkspace];
+      if (workspace.boards.remove(board)) {
+        return;
+      }
+
+      // Recursively search in folders
+      bool removed = false;
+      void removeFromFolder(WorkspaceFolder folder) {
+        if (folder.boards.remove(board)) {
+          removed = true;
+          return;
+        }
+        for (final sub in folder.subFolders) {
+          if (!removed) removeFromFolder(sub);
+        }
+      }
+
+      for (final folder in workspace.folders) {
+        if (!removed) removeFromFolder(folder);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final workspace = _workspaces[_selectedWorkspace];
@@ -151,10 +179,41 @@ class _ProgettiPageState extends State<ProgettiPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(board.name),
-            IconButton(
-              icon: const Icon(Icons.add),
-              tooltip: 'Add Group',
-              onPressed: () => _showAddGroupDialog(board),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Add Group',
+                  onPressed: () => _showAddGroupDialog(board),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: 'Delete Board',
+                  onPressed: () async {
+                    // Confirm deletion
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Board'),
+                        content: Text('Are you sure you want to delete the board "${board.name}"?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      _removeBoard(board);
+                    }
+                  },
+                ),
+              ],
             ),
           ],
         ),

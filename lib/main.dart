@@ -5,6 +5,7 @@ import 'package:life_leveling/services/theme_service.dart';
 import 'package:life_leveling/services/fatigue_service.dart';
 import 'package:life_leveling/services/level_service.dart';
 import 'package:life_leveling/services/stats_service.dart';
+import 'package:life_leveling/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,12 @@ void main() async {
   await FatigueService().init();
   await LevelService().init();
   await StatsService().init();
+
+  // Initialise and schedule local notifications.  This must occur after the
+  // QuestService has been initialised so that quests are loaded into memory.
+  final notificationService = NotificationService();
+  await notificationService.init();
+  await notificationService.scheduleDailyNotifications();
   final themeMode = await ThemeService().getThemeMode();
 
   runApp(MyApp(initialThemeMode: themeMode));

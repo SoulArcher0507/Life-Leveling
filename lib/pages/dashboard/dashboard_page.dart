@@ -29,26 +29,37 @@ class _DashboardPageState extends State<DashboardPage> {
     return questDate.isBefore(today);
   }
 
+  /// Returns true if two dates share the same calendar day (year, month, day).
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   
 
   @override
   Widget build(BuildContext context) {
-    // Elenco delle quest dal servizio
+    // Retrieve all quests from service
     final allQuests = QuestService().allQuests;
 
-    // Separiamo le quest in alta priorità vs giornaliere
-    final highPriorityQuests = allQuests.where((q) => !q.isDaily).toList();
-    final dailyQuests = allQuests.where((q) => q.isDaily).toList();
+    // Filter quests by the selected `_statsDate`. A quest appears in the
+    // dashboard lists only if its deadline falls on the same day as
+    // `_statsDate`. Daily quests use their deadline date even if they
+    // repeat weekly.
+    List<QuestData> highPriorityQuests = allQuests
+        .where((q) => !q.isDaily && _isSameDay(q.deadline, _statsDate))
+        .toList();
+    List<QuestData> dailyQuests = allQuests
+        .where((q) => q.isDaily && _isSameDay(q.deadline, _statsDate))
+        .toList();
 
-    // Ordiniamo
+    // Sort by deadline within the day
     highPriorityQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
     dailyQuests.sort((a, b) => a.deadline.compareTo(b.deadline));
 
-    // Mostriamo 3 e 3
+    // Limit to top three for dashboard preview
     final top3HighPriority = highPriorityQuests.length > 3
         ? highPriorityQuests.sublist(0, 3)
         : highPriorityQuests;
-
     final top3Daily = dailyQuests.length > 3
         ? dailyQuests.sublist(0, 3)
         : dailyQuests;
@@ -80,12 +91,14 @@ class _DashboardPageState extends State<DashboardPage> {
             // --- Box Quest ad Alta Priorità ---
             _buildDashboardCard(
               onTap: () {
-                // Clic sull'intero box
+                // When tapping the high priority box, navigate to the
+                // filtered quests page for the currently selected date.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const QuestsPage(
+                    builder: (context) => QuestsPage(
                       questType: QuestType.highPriority,
+                      initialDate: _statsDate,
                     ),
                   ),
                 );
@@ -113,11 +126,13 @@ class _DashboardPageState extends State<DashboardPage> {
             // --- Box Quest Giornaliere ---
             _buildDashboardCard(
               onTap: () {
+                // Navigate to daily quests page for the currently selected date.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const QuestsPage(
+                    builder: (context) => QuestsPage(
                       questType: QuestType.daily,
+                      initialDate: _statsDate,
                     ),
                   ),
                 );
