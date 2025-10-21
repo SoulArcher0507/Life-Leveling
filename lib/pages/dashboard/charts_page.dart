@@ -149,7 +149,35 @@ class _ChartsPageState extends State<ChartsPage> {
           const SizedBox(height: 12),
           _buildMonthlyChart(monthlyStats, maxMonthlyXp),
           const SizedBox(height: 24),
-          Text('Quests Completed', style: Theme.of(context).textTheme.bodyLarge),
+          // Navigation header for the quests completed chart.  Reuse the same
+          // week controls so that the user can quickly browse past and future
+          // weeks of quest completions.  The label is identical to the
+          // weekly XP/fatigue section.
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Quests Completed',
+                  style: Theme.of(context).textTheme.bodyLarge),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    tooltip: 'Previous week',
+                    onPressed: () => _changeWeek(-1),
+                  ),
+                  Text(
+                    _weekRangeLabel(),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    tooltip: 'Next week',
+                    onPressed: () => _changeWeek(1),
+                  ),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           _buildQuestCompletionChart(weeklyStats),
         ],
