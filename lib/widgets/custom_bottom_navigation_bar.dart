@@ -22,7 +22,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.work),
-          label: 'Progetti',
+          label: 'Projects',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.check_circle),
@@ -30,7 +30,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.bar_chart),
-          label: 'Grafici',
+          label: 'Charts',
         ),
       ],
       onTap: onTap,

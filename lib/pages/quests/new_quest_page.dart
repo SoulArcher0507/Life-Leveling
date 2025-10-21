@@ -19,17 +19,20 @@ class _NewQuestPageState extends State<NewQuestPage> {
   bool userIsDaily = false;
   bool repeatedWeekly = false;
 
+  // XP presets translated into English.  These presets provide a quick way
+  // to set XP based on the difficulty of the quest.  Users can still
+  // manually enter a custom value.
   final xpPresets = {
-    'Facile': 10,
-    'Media': 25,
-    'Difficile': 50,
-    'Molto Difficile': 100,
+    'Easy': 10,
+    'Medium': 25,
+    'Hard': 50,
+    'Very Hard': 100,
   };
 
-  String selectedXpPreset = 'Personalizzato';
+  String selectedXpPreset = 'Custom';
 
   List<bool> selectedWeekDays = List.filled(7, false);
-  final weekDayLabels = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+  final weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   DateTime? repeatUntil;
 
   DateTime? selectedDeadline;
@@ -51,7 +54,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Nuova Quest'),
+        title: const Text('New Quest'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -62,13 +65,13 @@ class _NewQuestPageState extends State<NewQuestPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ChoiceChip(
-                  label: const Text('Giornaliera'),
+                  label: const Text('Daily'),
                   selected: userIsDaily,
                   onSelected: (sel) => setState(() => userIsDaily = true),
                 ),
                 const SizedBox(width: 12),
                 ChoiceChip(
-                  label: const Text('Alta Priorità'),
+                  label: const Text('High Priority'),
                   selected: !userIsDaily,
                   onSelected: (sel) => setState(() => userIsDaily = false),
                 ),
@@ -77,7 +80,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
             const SizedBox(height: 16),
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Titolo Quest'),
+              decoration: const InputDecoration(labelText: 'Quest Title'),
             ),
             const SizedBox(height: 16),
             Row(
@@ -86,12 +89,12 @@ class _NewQuestPageState extends State<NewQuestPage> {
                   flex: 2,
                   child: DropdownButtonFormField<String>(
                     value: selectedXpPreset,
-                    decoration: const InputDecoration(labelText: 'Preset XP'),
+                    decoration: const InputDecoration(labelText: 'XP Preset'),
                     items: [
                       ...xpPresets.keys.map((k) => DropdownMenuItem(
                           value: k, child: Text('$k (${xpPresets[k]})'))),
                       const DropdownMenuItem(
-                          value: 'Personalizzato', child: Text('Personalizzato')),
+                          value: 'Custom', child: Text('Custom')),
                     ],
                     onChanged: (val) {
                       setState(() {
@@ -111,13 +114,13 @@ class _NewQuestPageState extends State<NewQuestPage> {
                   child: TextField(
                     controller: xpController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'XP'),
+                  decoration: const InputDecoration(labelText: 'XP'),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text('Difficoltà: $fatigue'),
+            Text('Difficulty: $fatigue'),
             Slider(
               value: fatigue.toDouble(),
               min: 0,
@@ -129,7 +132,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
             const SizedBox(height: 16),
             TextField(
               controller: notesController,
-              decoration: const InputDecoration(labelText: 'Note'),
+              decoration: const InputDecoration(labelText: 'Notes'),
               maxLines: 3,
             ),
             const SizedBox(height: 16),
@@ -148,7 +151,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Ripeti fino a'),
+                  const Text('Repeat until'),
                   TextButton(
                     onPressed: () async {
                       final picked = await showDatePicker(
@@ -161,7 +164,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
                     },
                     child: Text(
                       repeatUntil == null
-                          ? 'Scegli data'
+                          ? 'Choose date'
                           : DateFormat('dd/MM/yyyy').format(repeatUntil!),
                     ),
                   ),
@@ -172,7 +175,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Scadenza'),
+                  const Text('Deadline'),
                   TextButton(
                     onPressed: () async {
                       final picked = await showDatePicker(
@@ -187,7 +190,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
                     },
                     child: Text(
                       selectedDeadline == null
-                          ? 'Scegli data'
+                          ? 'Choose date'
                           : DateFormat('dd/MM/yyyy').format(selectedDeadline!),
                     ),
                   ),
@@ -197,7 +200,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Ora (opzionale)'),
+                  const Text('Time (optional)'),
                   TextButton(
                     onPressed: () async {
                       final picked = await showTimePicker(
@@ -210,7 +213,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
                     },
                     child: Text(
                       selectedDeadlineTime == null
-                          ? 'Scegli ora'
+                          ? 'Choose time'
                           : selectedDeadlineTime!.format(context),
                     ),
                   ),
@@ -222,7 +225,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
             Center(
               child: ElevatedButton(
                 onPressed: _createQuest,
-                child: const Text('Crea'),
+                child: const Text('Create'),
               ),
             ),
           ],

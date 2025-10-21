@@ -33,18 +33,18 @@ class _QuestsPageState extends State<QuestsPage> {
     if (widget.questType == QuestType.highPriority) {
       return _buildFilteredScaffold(
         context: context,
-        // Titolo in italiano con la prima lettera maiuscola solo per la prima parola
-        title: 'Quest ad alta priorità',
+        // English title for high priority quests
+        title: 'High Priority Quests',
         isDaily: false,
       );
     } else if (widget.questType == QuestType.daily) {
       return _buildFilteredScaffold(
         context: context,
-        title: 'Quest giornaliere',
+        title: 'Daily Quests',
         isDaily: true,
       );
     } else {
-      // Altrimenti, vista settimanale
+      // Otherwise, weekly view
       return _buildWeeklyScaffold(context);
     }
   }
@@ -79,11 +79,11 @@ class _QuestsPageState extends State<QuestsPage> {
                     TextStyle(color: _isOverdue(quest) ? Colors.red : null),
               ),
               subtitle: quest.isDaily
-                  ? Text('Quest giornaliera',
+                  ? Text('Daily',
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null))
                   : Text(
-                      "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
+                      "Due: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                     ),
@@ -145,13 +145,13 @@ class _QuestsPageState extends State<QuestsPage> {
                 child: Column(
                   children: [
                     _buildQuestSection(
-                      title: 'Quest ad alta priorità',
+                      title: 'High Priority Quests',
                       quests: highPriorityQuests,
                       context: context,
                     ),
                     const SizedBox(height: 16),
                     _buildQuestSection(
-                      title: 'Quest giornaliere',
+                      title: 'Daily Quests',
                       quests: dailyQuests,
                       context: context,
                     ),
@@ -246,7 +246,7 @@ class _QuestsPageState extends State<QuestsPage> {
             const SizedBox(height: 8.0),
             if (quests.isEmpty)
               Text(
-                'Nessuna quest trovata per questo giorno',
+                'No quests found for this day',
                 style: Theme.of(context).textTheme.bodyMedium,
               )
             else
@@ -262,8 +262,8 @@ class _QuestsPageState extends State<QuestsPage> {
                       ),
                       subtitle: Text(
                         quest.isDaily
-                            ? 'Quest giornaliera'
-                            : "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
+                            ? 'Daily'
+                            : "Due: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
                         style:
                             TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                       ),

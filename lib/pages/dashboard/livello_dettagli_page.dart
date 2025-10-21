@@ -31,7 +31,7 @@ class LivelloDettagliPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dettagli Livello'),
+        title: const Text('Level Details'),
         // L'icona "freccia indietro" appare automaticamente
         // se non la nascondi, e chiude la pagina col pop()
       ),
@@ -40,16 +40,17 @@ class LivelloDettagliPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$userName - Livello $currentLevel',
+            Text('$userName - Level $currentLevel',
                 style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
 
-            // Barra XP
+            // XP bar
             LinearProgressIndicator(
               value: xpPercentage,
               minHeight: 8.0,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary),
             ),
             const SizedBox(height: 8.0),
 
@@ -61,19 +62,19 @@ class LivelloDettagliPage extends StatelessWidget {
 
             // Info Classe
             Text(
-              'Classe: $userClass',
+              'Class: $userClass',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 4.0),
             Text(
-              'Abilità: $userAbilities',
+              'Abilities: $userAbilities',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 4.0),
             Text(
-              'Fatica odierna: $dailyFatigue/100',
+              "Today's fatigue: $dailyFatigue/100",
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: dailyFatigue > 100
                         ? Colors.red
@@ -88,13 +89,13 @@ class LivelloDettagliPage extends StatelessWidget {
             const Divider(),
 
             Text(
-              'Dettagli Addizionali',
+              'Additional Details',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 8.0),
             Text(
-              // Puoi aggiungere più dati o farlo dinamico
-              'Qui puoi inserire ulteriori statistiche, descrizioni narrative, progressi storici del livello, ecc.',
+              // Add more data or make it dynamic
+              'Here you can include additional statistics, narrative descriptions, historical progress of the level, etc.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],

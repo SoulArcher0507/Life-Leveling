@@ -24,12 +24,12 @@ class _MyHomePageState extends State<MyHomePage> {
   // _currentIndex indica quale sezione è selezionata nella BottomNavigationBar
   int _currentIndex = 0;
 
-  // Eventuale lista di titoli per l'AppBar
+  // Titles for the AppBar in English
   final List<String> _titles = [
     'Dashboard',
-    'Progetti',
+    'Projects',
     'Quests',
-    'Grafici',
+    'Charts',
   ];
 
   // Lista di pagine corrispondenti alle sezioni.

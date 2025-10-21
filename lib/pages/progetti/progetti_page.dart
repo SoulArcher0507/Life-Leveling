@@ -5,15 +5,13 @@ import 'package:life_leveling/models/quest_model.dart';
 import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/pages/quests/quest_detail_page.dart';
 
-// Possibili stati di una attività. Invece di avere una stringa vuota come
-// primo elemento (che risultava in uno stato "senza titolo"), definiamo
-// esplicitamente i quattro stati utilizzati nell'app. I nomi sono
-// tradotti in italiano per coerenza con l'interfaccia utente.
+// Possible states for a task. We define them explicitly rather than
+// including an empty string. These are translated into English.
 const List<String> kTaskStatusOptions = [
-  'Da fare',         // attività da iniziare
-  'In corso',        // attività attualmente in lavorazione
-  'Bloccata',        // attività che ha incontrato un impedimento
-  'Completata',      // attività terminata
+  'To Do',         // task to be started
+  'In progress',   // task currently being worked on
+  'Blocked',       // task that has encountered an impediment
+  'Completed',     // task finished
 ];
 
 const double kItemColumnWidth = 200;
@@ -108,7 +106,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               ElevatedButton.icon(
                 onPressed: _showAddWorkspaceDialog,
                 icon: const Icon(Icons.add),
-                label: const Text('Nuovo Workspace'),
+                label: const Text('New Workspace'),
               ),
             ],
           ),
@@ -123,7 +121,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               ElevatedButton.icon(
                 onPressed: () => _showAddBoardDialog(workspace),
                 icon: const Icon(Icons.add),
-                label: const Text('Aggiungi Board'),
+                label: const Text('Add Board'),
               ),
             ],
           ),
@@ -155,7 +153,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
             Text(board.name),
             IconButton(
               icon: const Icon(Icons.add),
-              tooltip: 'Aggiungi Gruppo',
+              tooltip: 'Add Group',
               onPressed: () => _showAddGroupDialog(board),
             ),
           ],
@@ -185,7 +183,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               IconButton(
                 onPressed: () => _showAddTaskDialog(board, group),
                 icon: const Icon(Icons.add, color: Colors.white),
-                tooltip: 'Aggiungi Attività',
+                tooltip: 'Add Task',
               )
             ],
           ),
@@ -213,7 +211,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                     const DataColumn(
                         label: SizedBox(
                           width: kItemColumnWidth,
-                          child: Text('Elemento'),
+                          child: Text('Item'),
                         )),
                     // Colonne dinamiche del board (es. Stato, Scadenza)
                 ...board.columns.map((c) => DataColumn(
@@ -303,14 +301,14 @@ class _ProgettiPageState extends State<ProgettiPage> {
       }
     }
 
-    // Colonna delle azioni (aggiunta di sotto‑attività)
+    // Action column (add subtask)
     cells.add(
       DataCell(
         SizedBox(
           width: kActionsColumnWidth,
           child: IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Aggiungi Sottoattività',
+            tooltip: 'Add Subtask',
             onPressed: () => _showAddSubtaskDialog(item),
           ),
         ),
@@ -349,15 +347,15 @@ class _ProgettiPageState extends State<ProgettiPage> {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Nuovo Workspace'),
+        title: const Text('New Workspace'),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(labelText: 'Nome Workspace'),
+          decoration: const InputDecoration(labelText: 'Workspace Name'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annulla'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
@@ -367,7 +365,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
               });
               Navigator.pop(context);
             },
-            child: const Text('Aggiungi'),
+            child: const Text('Add'),
           ),
         ],
       ),
@@ -379,29 +377,29 @@ class _ProgettiPageState extends State<ProgettiPage> {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Nuovo Board'),
+        title: const Text('New Board'),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(labelText: 'Nome Board'),
+          decoration: const InputDecoration(labelText: 'Board Name'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annulla'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               setState(() {
                 workspace.boards.add(Board(
                   name: nameController.text,
-                  // Usa intestazioni italiane per le colonne di default
-                  columns: const ['Stato', 'Scadenza'],
+                  // Default headers for the columns in English
+                  columns: const ['Status', 'Due'],
                   groups: [],
                 ));
               });
               Navigator.pop(context);
             },
-            child: const Text('Aggiungi'),
+            child: const Text('Add'),
           ),
         ],
       ),
@@ -411,28 +409,28 @@ class _ProgettiPageState extends State<ProgettiPage> {
   Future<void> _showAddGroupDialog(Board board) async {
     final nameController = TextEditingController();
     Color selectedColor = Colors.grey;
-    // Opzioni di colore con etichette italiane
+    // Color options with English labels
     const colorOptions = {
-      'Grigio': Colors.grey,
-      'Blu': Colors.blue,
-      'Verde': Colors.green,
-      'Rosso': Colors.red,
-      'Arancione': Colors.orange,
-      'Viola': Colors.purple,
-      'Rosa': Colors.pink,
-      'Turchese': Colors.teal,
+      'Grey': Colors.grey,
+      'Blue': Colors.blue,
+      'Green': Colors.green,
+      'Red': Colors.red,
+      'Orange': Colors.orange,
+      'Purple': Colors.purple,
+      'Pink': Colors.pink,
+      'Teal': Colors.teal,
     };
     await showDialog(
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (context, setModalState) => AlertDialog(
-          title: const Text('Nuovo Gruppo'),
+          title: const Text('New Group'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Nome Gruppo'),
+                decoration: const InputDecoration(labelText: 'Group Name'),
               ),
               const SizedBox(height: 8),
               DropdownButton<Color>(
@@ -463,7 +461,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annulla'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -476,7 +474,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 });
                 Navigator.pop(context);
               },
-              child: const Text('Aggiungi'),
+              child: const Text('Add'),
             ),
           ],
         ),
@@ -492,13 +490,13 @@ class _ProgettiPageState extends State<ProgettiPage> {
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (context, setModalState) => AlertDialog(
-          title: const Text('Nuova Attività'),
+          title: const Text('New Task'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(labelText: 'Titolo'),
+                decoration: const InputDecoration(labelText: 'Title'),
               ),
               DropdownButtonFormField<String>(
                 value: selectedStatus,
@@ -512,12 +510,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
                       child: _statusChip(status),
                     ),
                 ],
-                decoration: const InputDecoration(labelText: 'Stato'),
+                decoration: const InputDecoration(labelText: 'Status'),
               ),
               TextField(
                 controller: dueController,
                 readOnly: true,
-                decoration: const InputDecoration(labelText: 'Scadenza'),
+                decoration: const InputDecoration(labelText: 'Due'),
                 onTap: () async {
                   final now = DateTime.now();
                   final picked = await showDatePicker(
@@ -536,7 +534,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annulla'),
+            child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -548,7 +546,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 });
                 Navigator.pop(context);
               },
-              child: const Text('Aggiungi'),
+              child: const Text('Add'),
             ),
           ],
         ),
@@ -564,13 +562,13 @@ class _ProgettiPageState extends State<ProgettiPage> {
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (context, setModalState) => AlertDialog(
-          title: const Text('Nuova Sottoattività'),
+          title: const Text('New Subtask'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(labelText: 'Titolo'),
+                decoration: const InputDecoration(labelText: 'Title'),
               ),
               DropdownButtonFormField<String>(
                 value: selectedStatus,
@@ -584,12 +582,12 @@ class _ProgettiPageState extends State<ProgettiPage> {
                       child: _statusChip(status),
                     ),
                 ],
-                decoration: const InputDecoration(labelText: 'Stato'),
+                decoration: const InputDecoration(labelText: 'Status'),
               ),
               TextField(
                 controller: dueController,
                 readOnly: true,
-                decoration: const InputDecoration(labelText: 'Scadenza'),
+                decoration: const InputDecoration(labelText: 'Due'),
                 onTap: () async {
                   final now = DateTime.now();
                   final picked = await showDatePicker(
@@ -609,7 +607,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annulla'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -623,7 +621,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 });
                 Navigator.pop(context);
               },
-              child: const Text('Aggiungi'),
+              child: const Text('Add'),
             ),
           ],
         ),
@@ -632,15 +630,15 @@ class _ProgettiPageState extends State<ProgettiPage> {
   }
 
   Color _statusColor(String status) {
-    // Mappa lo stato a un colore specifico. I nomi sono in italiano.
+    // Map the status to a specific colour. Names are in English.
     switch (status) {
-      case 'Da fare':
+      case 'To Do':
         return Colors.blueGrey;
-      case 'In corso':
+      case 'In progress':
         return Colors.orange;
-      case 'Bloccata':
+      case 'Blocked':
         return Colors.red;
-      case 'Completata':
+      case 'Completed':
         return Colors.green;
       default:
         return Colors.grey;
@@ -659,14 +657,14 @@ class _ProgettiPageState extends State<ProgettiPage> {
       }
     }
     final board = Board(
-      // Nome tradotto in italiano per coerenza
-      name: 'Bacheca di esempio',
-      // Colonne di default in italiano: Stato e Scadenza
-      columns: ['Stato', 'Scadenza'],
+      // Sample board in English for demonstration
+      name: 'Sample Board',
+      // Default columns in English: Status and Due
+      columns: ['Status', 'Due'],
       groups: [
         BoardGroup(
-          // Gruppo per le attività da fare
-          name: 'Da fare',
+          // Group for tasks to be done
+          name: 'To Do',
           color: Colors.blue,
           items: [
             () {
@@ -683,8 +681,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 title: 'Task 1',
                 xp: 10,
                 fatigue: 5,
-                // Stato "In corso" per indicare che l'attività è stata iniziata
-                values: ['In corso', '2023-12-01'],
+                // "In progress" indicates that the task has been started
+                values: ['In progress', '2023-12-01'],
                 quest: q,
                 subItems: [
                   () {
@@ -701,8 +699,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
                       title: 'Subtask 1',
                       xp: 5,
                       fatigue: 3,
-                      // Sotto-attività completata
-                      values: ['Completata', ''],
+                      // Subtask completed
+                      values: ['Completed', ''],
                       quest: sq,
                     );
                   }(),
@@ -723,16 +721,16 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 title: 'Task 2',
                 xp: 15,
                 fatigue: 7,
-                // Stato bloccata
-                values: ['Bloccata', '2023-11-15'],
+                // Task blocked
+                values: ['Blocked', '2023-11-15'],
                 quest: q,
               );
             }(),
           ],
         ),
         BoardGroup(
-          // Gruppo per le attività completate
-          name: 'Completate',
+          // Group for completed tasks
+          name: 'Completed',
           color: Colors.green,
           items: [
             () {
@@ -749,8 +747,8 @@ class _ProgettiPageState extends State<ProgettiPage> {
                 title: 'Task 3',
                 xp: 20,
                 fatigue: 10,
-                // Attività completata
-                values: ['Completata', '2023-10-01'],
+                // Task completed
+                values: ['Completed', '2023-10-01'],
                 quest: q,
               );
             }(),
@@ -760,7 +758,7 @@ class _ProgettiPageState extends State<ProgettiPage> {
     );
 
     return [
-      Workspace(name: 'Workspace principale', boards: [board]),
+      Workspace(name: 'Main Workspace', boards: [board]),
     ];
   }
 }

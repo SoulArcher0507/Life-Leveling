@@ -18,7 +18,7 @@ class QuestDetailsPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.check_circle_outline),
-            tooltip: 'Completa',
+            tooltip: 'Complete',
             onPressed: () async {
               // Completa la quest: aggiunge fatica, esperienza e aggiorna statistiche
               await FatigueService().addFatigue(quest.fatigue);
@@ -31,7 +31,7 @@ class QuestDetailsPage extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: 'Elimina',
+            tooltip: 'Delete',
             onPressed: () async {
               // Elimina la quest senza completarla
               await QuestService().removeQuest(quest);
@@ -40,7 +40,7 @@ class QuestDetailsPage extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Modifica',
+            tooltip: 'Edit',
             onPressed: () {
               // TODO: apri dialog di modifica
             },
@@ -59,12 +59,12 @@ class QuestDetailsPage extends StatelessWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.text_fields),
-                  title: const Text('Titolo'),
+                  title: const Text('Title'),
                   subtitle: Text(quest.title),
                 ),
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title: Text('Scadenza'),
+                  title: const Text('Due'),
                   subtitle: Text(
                       "${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}"),
                 ),
@@ -75,24 +75,24 @@ class QuestDetailsPage extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.fitness_center),
-                  title: const Text('Difficoltà'),
+                  title: const Text('Difficulty'),
                   subtitle: Text('${quest.fatigue}'),
                 ),
                 if (quest.notes.isNotEmpty)
                   ListTile(
                     leading: const Icon(Icons.notes),
-                    title: const Text('Note'),
+                    title: const Text('Notes'),
                     subtitle: Text(quest.notes),
                   ),
                 ListTile(
                   leading: const Icon(Icons.repeat),
-                  title: const Text('Giornaliera'),
-                  subtitle: Text(quest.isDaily ? 'Sì' : 'No'),
+                  title: const Text('Daily'),
+                  subtitle: Text(quest.isDaily ? 'Yes' : 'No'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.loop),
-                  title: const Text('Ripetizione settimanale'),
-                  subtitle: Text(quest.repeatedWeekly ? 'Sì' : 'No'),
+                  title: const Text('Weekly Repeat'),
+                  subtitle: Text(quest.repeatedWeekly ? 'Yes' : 'No'),
                 ),
               ],
             ),

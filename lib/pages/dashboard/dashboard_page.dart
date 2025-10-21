@@ -95,7 +95,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Quest ad Alta Priorità',
+                    'High Priority Quests',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 8.0),
@@ -126,7 +126,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Quest Giornaliere',
+                    'Daily Quests',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 8.0),
@@ -216,15 +216,15 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Quest completate: ${stats.questsCompleted}',
+            'Quests completed: ${stats.questsCompleted}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
-            'XP guadagnati: ${stats.xpGained.toInt()}',
+            'XP gained: ${stats.xpGained.toInt()}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           Text(
-            'Fatica: ${stats.fatigue}',
+            'Fatigue: ${stats.fatigue}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
@@ -276,19 +276,20 @@ class _DashboardPageState extends State<DashboardPage> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               Text(
-                'Livello $currentLevel',
+                'Level $currentLevel',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
           const SizedBox(height: 8.0),
 
-          // Barra XP
+          // XP bar
           LinearProgressIndicator(
             value: xpPercentage,
             minHeight: 8.0,
-            backgroundColor: Colors.grey[300],
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(height: 8.0),
 
@@ -301,19 +302,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
           // Classe e abilità
           Text(
-            'Classe: $userClass',
+            'Class: $userClass',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
           const SizedBox(height: 4.0),
           Text(
-            'Abilità: $userAbilities',
+            'Abilities: $userAbilities',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 4.0),
           Text(
-            'Fatica odierna: $dailyFatigue/100',
+            "Today's fatigue: $dailyFatigue/100",
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: dailyFatigue > 100
                       ? Colors.red
@@ -334,7 +335,7 @@ class _DashboardPageState extends State<DashboardPage> {
 }) {
     if (quests.isEmpty) {
       return Text(
-        'Nessuna quest trovata per questo giorno',
+        'No quests found for this day',
         style: Theme.of(context).textTheme.bodyMedium,
       );
     }
@@ -360,12 +361,12 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               subtitle: quest.isDaily
                   ? Text(
-                      'Giornaliera',
+                      'Daily',
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                     )
                   : Text(
-                      "Scadenza: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
+                      "Due: ${DateFormat('dd/MM/yyyy').format(quest.deadline)}${quest.deadline.hour != 0 || quest.deadline.minute != 0 ? ' ${DateFormat('HH:mm').format(quest.deadline)}' : ''}",
                       style:
                           TextStyle(color: _isOverdue(quest) ? Colors.red : null),
                     ),
