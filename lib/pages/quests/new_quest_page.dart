@@ -243,15 +243,25 @@ class _NewQuestPageState extends State<NewQuestPage> {
 
     if (userIsDaily) {
       final now = DateTime.now();
-      // Normalizziamo la data corrente alle 00:00 per le quest giornaliere
+      // Normalise the current date to midnight for daily quests
       final startDate = DateTime(now.year, now.month, now.day);
-      final endDate = repeatUntil != null
-          ? DateTime(repeatUntil!.year, repeatUntil!.month, repeatUntil!.day)
-          : startDate;
+      // If the user specified a repeat end date use it; otherwise, when days
+      // of the week are selected, schedule over the next 7 days (a full
+      // week) so that daily quests appear throughout the week.  If no days
+      // are selected the end date remains the start date.
+      final DateTime endDate;
+      if (repeatUntil != null) {
+        endDate = DateTime(repeatUntil!.year, repeatUntil!.month, repeatUntil!.day);
+      } else {
+        // When days are selected we want quests to appear for one full
+        // week starting from today; otherwise we create a single quest.
+        endDate = selectedWeekDays.any((sel) => sel)
+            ? startDate.add(const Duration(days: 6))
+            : startDate;
+      }
 
       if (selectedWeekDays.any((sel) => sel)) {
-        // L'utente ha selezionato dei giorni della settimana: creiamo una quest
-        // per ciascun giorno selezionato nel range [startDate, endDate].
+        // Create a quest for each selected weekday within the date range
         for (var d = startDate;
             !d.isAfter(endDate);
             d = d.add(const Duration(days: 1))) {
@@ -270,8 +280,7 @@ class _NewQuestPageState extends State<NewQuestPage> {
           }
         }
       } else {
-        // Nessun giorno selezionato: creiamo una singola quest giornaliera
-        // non ripetuta per la data corrente
+        // No weekdays selected: create a single non‑repeating daily quest
         final q = QuestData(
           title: newTitle,
           deadline: startDate,

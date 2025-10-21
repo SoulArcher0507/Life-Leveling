@@ -242,6 +242,19 @@ class _DashboardPageState extends State<DashboardPage> {
             'Fatigue: ${stats.fatigue}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
+          const SizedBox(height: 8),
+          // Display the current streak and freeze status.  The streak
+          // increments when at least 60% of the daily XP goal is met and
+          // resets otherwise (unless a freeze is available).  Completing all
+          // quests grants a freeze for the next day.
+          Text(
+            'Streak: ${StatsService().currentStreak} day${StatsService().currentStreak == 1 ? '' : 's'}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          Text(
+            'Streak freeze: ${StatsService().hasStreakFreeze ? 'Available' : 'None'}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );

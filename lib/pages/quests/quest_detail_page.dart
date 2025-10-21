@@ -4,6 +4,7 @@ import 'package:life_leveling/services/quest_service.dart';
 import 'package:life_leveling/services/fatigue_service.dart';
 import 'package:life_leveling/services/level_service.dart';
 import 'package:life_leveling/services/stats_service.dart';
+import 'package:life_leveling/pages/quests/edit_quest_page.dart';
 import 'package:intl/intl.dart';
 
 class QuestDetailsPage extends StatelessWidget {
@@ -41,8 +42,20 @@ class QuestDetailsPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Edit',
-            onPressed: () {
-              // TODO: apri dialog di modifica
+            onPressed: () async {
+              // Open the edit quest page and wait for result.  If the
+              // quest was modified (result == true) refresh the state by
+              // popping with true so the parent list updates.
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditQuestPage(quest: quest),
+                ),
+              );
+              if (result == true) {
+                // Indicate to the caller that an update occurred
+                Navigator.of(context).pop(true);
+              }
             },
           ),
         ],
